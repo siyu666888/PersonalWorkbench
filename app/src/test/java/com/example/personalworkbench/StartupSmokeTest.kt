@@ -126,6 +126,16 @@ class StartupSmokeTest {
             for (i in 0 until entities.length()) {
                 val e = entities.getJSONObject(i)
                 raw.execSQL(e.getString("createSql").replace("\${TABLE_NAME}", e.getString("tableName")))
+                // v4 库的同名索引必须一并建出：Room 迁移后校验会对比索引，
+                // 漏建会报「Migration didn't properly handle: tasks」（缺 index_tasks_* 等）
+                e.optJSONArray("indices")?.let { arr ->
+                    for (j in 0 until arr.length()) {
+                        raw.execSQL(
+                            arr.getJSONObject(j).getString("createSql")
+                                .replace("\${TABLE_NAME}", e.getString("tableName"))
+                        )
+                    }
+                }
             }
             raw.execSQL("PRAGMA user_version = 4")
         } finally {
@@ -289,6 +299,16 @@ class StartupSmokeWithDataTest {
             for (i in 0 until entities.length()) {
                 val e = entities.getJSONObject(i)
                 raw.execSQL(e.getString("createSql").replace("\${TABLE_NAME}", e.getString("tableName")))
+                // v4 库的同名索引必须一并建出：Room 迁移后校验会对比索引，
+                // 漏建会报「Migration didn't properly handle: tasks」（缺 index_tasks_* 等）
+                e.optJSONArray("indices")?.let { arr ->
+                    for (j in 0 until arr.length()) {
+                        raw.execSQL(
+                            arr.getJSONObject(j).getString("createSql")
+                                .replace("\${TABLE_NAME}", e.getString("tableName"))
+                        )
+                    }
+                }
             }
             // 预置真实数据（V1.3.7 用户库的典型行）
             raw.execSQL(
