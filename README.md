@@ -776,7 +776,10 @@ PersonalWorkbench.exe --on-top                 # 窗口置顶
 
 ### 验证
 - 新增 `DateFormatAndRecordOrderTest`（6 个用例）：覆盖默认格式含年份、跨年可区分、跨天倒序、同日升序、新增记录后顺序正确、`getRecordsInRange` 同样有序。
-- `./gradlew testDebugUnitTest` BUILD SUCCESSFUL，**84 / 84 全绿**。
+- `./gradlew testDebugUnitTest` BUILD SUCCESSFUL，**85 / 85 全绿**。
+- `./gradlew assembleRelease` BUILD SUCCESSFUL。正式版 `outputs/PersonalWorkbench-v1.6.1-release.apk`（**3,430,544 bytes**，v2 + v3 双签名，证书 `CN=PersonalWorkbench`），SHA-256 `029da22e104d5fdc861d0f270a6b143e381f0bf4989f94fd877b0a187f3b2415`。
+- 混淆映射已归档 `outputs/mapping-v1.6.1.txt`（每次发布需单独保留，否则线上崩溃堆栈无法还原）。
+- 日志填写页顶栏经 Robolectric 原生渲染截图实证（`docs/screenshots/08-log-fill.png`，360dp 窄屏下元素无遮挡）。
 
 ## 三·二十五、V1.5.1 每日打卡合并分组 + 高级日期筛选
 
