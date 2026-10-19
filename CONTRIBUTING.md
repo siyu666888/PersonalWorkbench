@@ -42,6 +42,20 @@ cd PersonalWorkbench
 
 每次 push / PR 会自动触发 CI（`.github/workflows/ci.yml`）：跑全部测试 + 构建 debug 包；配置了 Secrets 的仓库还会构建并校验签名的 release 包。**PR 合并前必须保证 CI 绿**。
 
+### 界面截图怎么生成
+
+README 中的演示截图由 JVM 内的Robolectric 原生图形模式渲染，**不需要模拟器或真机**：
+
+```bash
+./gradlew :app:testDebugUnitTest --tests "ScreenshotGeneratorTest"
+# 产物：docs/screenshots/01-home.png … 07-settings.png
+```
+
+新增页面时，在 `ScreenshotGeneratorTest` 里加一个 `shot_xx_xxx()` 方法即可。
+注意 Compose 测试规则**每个测试方法只能 `setContent` 一次**，所以一页一个方法，不要写成循环。
+
+若本机装了模拟器，也可用 `bash tools/capture_demo.sh` 采集真实设备截图与录屏（需开启硬件加速）。
+
 ## 4. 代码约定
 
 - **架构**：Jetpack Compose + Material 3，MVVM（ViewModel + Flow），Room 本地库，手动 DI（`di/AppContainer.kt`）。

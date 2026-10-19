@@ -6,6 +6,24 @@
 > 一站式个人效率中心 —— 让笔记、任务、日程、目标、项目和文件在同一个工作台内无缝流转。
 > 依据《个人工作台APP_PRD.docx》《个人工作台APP_UI设计规范.docx》《个人工作台APP_Figma标注导出规范.docx》开发。
 
+## 〇、应用演示
+
+<p align="center">
+  <img src="docs/screenshots/demo.gif" width="300" alt="应用演示：首页 / 待办 / 日程 / 笔记 / 目标 / 报表 / 我的">
+</p>
+
+| 首页 | 待办 | 日程 | 笔记 |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/01-home.png" width="180" alt="首页"> | <img src="docs/screenshots/02-todo.png" width="180" alt="待办"> | <img src="docs/screenshots/03-calendar.png" width="180" alt="日程"> | <img src="docs/screenshots/04-notes.png" width="180" alt="笔记"> |
+
+| 目标 | 统计报表 | 我的 |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/05-goals.png" width="180" alt="目标"> | <img src="docs/screenshots/06-reports.png" width="180" alt="统计报表"> | <img src="docs/screenshots/07-settings.png" width="180" alt="我的"> |
+
+> 截图由 `ScreenshotGeneratorTest`（Robolectric 原生图形模式）在 JVM 内真实渲染生成，
+> 预置了演示数据以便直观看到界面状态。重新生成：
+> `./gradlew :app:testDebugUnitTest --tests "ScreenshotGeneratorTest"`
+
 ## 一、技术栈
 
 | 维度 | 选型 | 依据 |
@@ -1029,4 +1047,6 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ## 九、贡献与许可
 
 - **欢迎贡献**：报 Bug、提功能建议、改进界面与测试都欢迎。请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)：含本地构建命令、代码约定、数据库迁移注意事项与 PR 检查清单。
+- **提Issue**：仓库已配置表单 —— [Bug 报告](https://github.com/siyu666888/PersonalWorkbench/issues/new?template=bug_report.yml) / [功能建议](https://github.com/siyu666888/PersonalWorkbench/issues/new?template=feature_request.yml)，照表单填可显著加快定位速度。
+- **聊想法**：[Discussions 讨论区](https://github.com/siyu666888/PersonalWorkbench/discussions) 用于使用方法问答、功能提案与开发交流。
 - **许可证**：本项目采用 [MIT License](LICENSE) —— 允许自由使用、修改与分发（保留版权声明即可），商用亦无限制。
