@@ -22,6 +22,10 @@ jobs:
     name: Build & Test
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # 注意：if 条件里不允许用 secrets 上下文（Unrecognized named-value），
+    # 标准做法是先在 job 级 env 里求值，步骤里改判 env 变量
+    env:
+      HAS_RELEASE_SECRETS: ${{ secrets.KEYSTORE_BASE64 != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,7 +54,7 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Build & sign release APK (requires secrets)
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        if: env.HAS_RELEASE_SECRETS == 'true'
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
