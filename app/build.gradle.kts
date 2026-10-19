@@ -44,8 +44,8 @@ android {
         applicationId = "com.example.personalworkbench"
         minSdk = 26          // PRD 6.2: 最低支持 Android 8.0 (API 26)
         targetSdk = 34
-        versionCode = 31
-        versionName = "1.6.0"
+        versionCode = 32
+        versionName = "1.6.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

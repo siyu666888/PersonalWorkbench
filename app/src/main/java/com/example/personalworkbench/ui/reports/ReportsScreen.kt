@@ -617,12 +617,21 @@ private fun WorkLogsCard(logs: List<WorkLogEntity>) {
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        formatDate(log.date, "M/d"),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.width(46.dp)
-                    )
+                    // V1.6.1：补年份。窄固定列放不下单行完整日期，改为「年份 / 月日」两行堆叠
+                    Column(modifier = Modifier.width(72.dp)) {
+                        Text(
+                            formatDate(log.date, "yyyy年"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
+                        )
+                        Text(
+                            formatDate(log.date, "M月d日"),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
+                        )
+                    }
                     Text(
                         preview,
                         style = MaterialTheme.typography.bodyMedium,
@@ -892,7 +901,7 @@ private fun HighlightsCard(data: ReportData) {
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "农历${formatDate(data.start, "M月d日")} 起 ${data.lunarRange}",
+                    "农历${formatDate(data.start)} 起 ${data.lunarRange}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

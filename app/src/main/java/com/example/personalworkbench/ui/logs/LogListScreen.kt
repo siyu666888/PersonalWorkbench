@@ -62,6 +62,7 @@ import com.example.personalworkbench.di.AppContainer
 import com.example.personalworkbench.util.LunarUtils
 import com.example.personalworkbench.util.dayStartMillis
 import com.example.personalworkbench.util.formatDate
+import com.example.personalworkbench.util.formatDateTime
 import com.example.personalworkbench.util.monthStartMillis
 import com.example.personalworkbench.util.stripMarkdown
 import com.example.personalworkbench.util.weekOfYear
@@ -240,7 +241,7 @@ private fun LogCard(log: WorkLogEntity, onOpen: () -> Unit, onDelete: () -> Unit
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    formatDate(log.date, "M月d日"),
+                    formatDate(log.date),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -285,7 +286,7 @@ private fun LogCard(log: WorkLogEntity, onOpen: () -> Unit, onDelete: () -> Unit
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "第 ${weekOfYear(log.date)} 周 · 更新于 ${formatDate(log.updatedAt, "M/d HH:mm")} · 长按可删除",
+                "第 ${weekOfYear(log.date)} 周 · 更新于 ${formatDateTime(log.updatedAt)} · 长按可删除",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -109,7 +109,7 @@ fun SearchScreen(nav: NavHostController, container: AppContainer) {
                                     icon = Icons.Outlined.CheckCircle,
                                     title = t.title,
                                     subtitle = buildString {
-                                        if (t.dueDate != null) append("截止 ${formatDate(t.dueDate, "M月d日")}")
+                                        if (t.dueDate != null) append("截止 ${formatDate(t.dueDate)}")
                                         if (t.tags.isNotEmpty()) append(if (t.dueDate != null) " · " else "").append(t.tags.joinToString(" "))
                                     }.ifBlank { "无截止时间" },
                                     onClick = { nav.navigate(Routes.todoDetail(t.id)) }

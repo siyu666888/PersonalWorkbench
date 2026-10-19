@@ -21,6 +21,7 @@ import com.example.personalworkbench.util.dayEndMillis
 import com.example.personalworkbench.util.dayStartMillis
 import com.example.personalworkbench.util.daysInMonth
 import com.example.personalworkbench.util.formatDate
+import com.example.personalworkbench.util.formatShortDate
 import com.example.personalworkbench.util.formatMonth
 import com.example.personalworkbench.util.monthStartMillis
 import com.example.personalworkbench.util.weekStartMillis
@@ -231,7 +232,9 @@ class ReportsViewModel(private val container: AppContainer) : ViewModel() {
             val de = dayEndMillis(d)
             tasks.count { it.status == TaskStatus.COMPLETED && it.completedAt != null && it.completedAt in d..de }
         }
-        val dailyLabels = dayStarts.map { formatDate(it, "M/d") }
+        // X 轴标签：柱子密集处放不下完整年月日会重叠（每月最多只画 ~7 个标签且按柱居中），
+        // 故此处保留紧凑短格式；年份由本期报告标题带你（见下方 title），不存在跨年歧义。
+        val dailyLabels = dayStarts.map { formatShortDate(it) }
         val dailySchedules = dayStarts.map { d ->
             val de = dayEndMillis(d)
             schedules.count { it.startTime in d..de }
@@ -268,7 +271,13 @@ class ReportsViewModel(private val container: AppContainer) : ViewModel() {
             start = start,
             end = end,
             title = if (period == ReportPeriod.WEEK) {
-                "${formatDate(start, "yyyy年M月d日")} - ${formatDate(end, "M月d日")}"
+                // 跨年周：两端都带年份；同年：年份只出现一次，避免标题过长
+                val sameYear = java.util.Calendar.getInstance().apply { timeInMillis = start }
+                    .get(java.util.Calendar.YEAR) ==
+                    java.util.Calendar.getInstance().apply { timeInMillis = end }
+                        .get(java.util.Calendar.YEAR)
+                if (sameYear) "${formatDate(start)} - ${formatDate(end, "M月d日")}"
+                else "${formatDate(start)} - ${formatDate(end)}"
             } else formatMonth(start),
             lunarRange = lunarRange,
             highlights = highlights.toList(),

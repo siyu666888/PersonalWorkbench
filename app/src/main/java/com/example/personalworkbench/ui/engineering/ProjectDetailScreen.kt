@@ -412,9 +412,18 @@ private fun MilestoneTimeline(project: ProjectEntity, milestones: List<Milestone
                             Box(Modifier.size(14.dp).clip(CircleShape).background(milestoneStatusColor(m.status)))
                             Spacer(Modifier.weight(1f - frac))
                         }
-                        Text(formatDate(m.planDate, "M/d"), style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.width(48.dp), color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                        // V1.6.1：补年份。甘特图日期列只有 56dp，改「年份 / 月日」两行堆叠避免溢出
+                        Column(
+                            modifier = Modifier.width(56.dp),
+                            horizontalAlignment = androidx.compose.ui.Alignment.End
+                        ) {
+                            Text(formatDate(m.planDate, "yyyy年"), style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                            Text(formatDate(m.planDate, "M月d日"), style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                        }
                     }
                 }
                 Spacer(Modifier.height(8.dp))

@@ -94,6 +94,7 @@ import com.example.personalworkbench.ui.theme.LocalSemanticColors
 import com.example.personalworkbench.util.datePickerMillisToLocal
 import com.example.personalworkbench.util.dayStartMillis
 import com.example.personalworkbench.util.formatDate
+import com.example.personalworkbench.util.formatDateTime
 import com.example.personalworkbench.util.saveGoalImage
 import com.example.personalworkbench.viewmodel.GoalDetailViewModel
 import java.io.File
@@ -752,7 +753,8 @@ private fun GoalTrackingCard(
 @Composable
 private fun RecordRow(r: GoalRecordEntity) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(formatDate(r.recordDate), style = MaterialTheme.typography.bodyMedium)
+        // V1.6.1：补年份 + 当天打卡时刻（recordDate 是完整时间戳，同一天多次打卡需靠时刻区分）
+        Text(formatDateTime(r.recordDate), style = MaterialTheme.typography.bodyMedium)
         Text(
             "  +${r.value.toInt()}${if (r.isMakeup) " (补签)" else ""}",
             style = MaterialTheme.typography.bodyMedium,

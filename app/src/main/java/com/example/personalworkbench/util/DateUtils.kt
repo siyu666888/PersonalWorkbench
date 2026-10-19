@@ -56,11 +56,25 @@ fun addMonths(ts: Long, months: Int): Long {
     return c.timeInMillis
 }
 
-fun formatDate(ts: Long?, pattern: String = "M月d日"): String =
+/**
+ * 日期格式化（默认含年份，V1.6.1：跨年后不需再猜是哪一年）。
+ *
+ * 默认模式统一为 `yyyy年M月d日`，因此**不要为了省空间自行传 "M月d日"**：
+ * 列表、详情页一律显示完整年月日；只有确实是「同一年内、上下文已给出年份」的
+ * 紧凑标签（如日历周格、图表坐标轴）才用 [formatShortDate] 这类显式短格式。
+ */
+fun formatDate(ts: Long?, pattern: String = "yyyy年M月d日"): String =
     if (ts == null) "" else SimpleDateFormat(pattern, Locale.CHINA).format(Date(ts))
 
-fun formatDateTime(ts: Long?, pattern: String = "M月d日 HH:mm"): String =
+/** 日期 + 时间（默认含年份：`2024年5月1日 10:30`） */
+fun formatDateTime(ts: Long?, pattern: String = "yyyy年M月d日 HH:mm"): String =
     if (ts == null) "" else SimpleDateFormat(pattern, Locale.CHINA).format(Date(ts))
+
+/**
+ * 紧凑短日期（`M月d日`），**仅用于**横轴/网格等空间受限且年份已在别处展示的位置。
+ * 列表与详情请一律使用 [formatDate]，避免跨年歧义。
+ */
+fun formatShortDate(ts: Long?): String = formatDate(ts, "M月d日")
 
 fun formatTime(ts: Long?, pattern: String = "HH:mm"): String =
     if (ts == null) "" else SimpleDateFormat(pattern, Locale.CHINA).format(Date(ts))

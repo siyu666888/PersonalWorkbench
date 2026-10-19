@@ -156,9 +156,9 @@ fun CalendarScreen(nav: NavHostController, container: AppContainer) {
         CalendarViewMode.MONTH -> formatMonth(selected)
         CalendarViewMode.WEEK -> {
             val ws = weekStartMillis(selected)
-            "${formatDate(ws, "M.d")} - ${formatDate(ws + 6 * DAY_MS, "M.d")}"
+            weekRangeLabel(ws)
         }
-        CalendarViewMode.DAY -> formatDate(selected, "M月d日 E")
+        CalendarViewMode.DAY -> formatDate(selected, "yyyy年M月d日 E")
     }
     // 当前查看的周期是否就是「本」周期：不是时给出明确的回跳入口（问题 3）
     val now = System.currentTimeMillis()
@@ -599,7 +599,12 @@ private fun DayHeader(day: Long) {
     val lunar = remember(day) { LunarUtils.of(day) }
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(formatDate(day, "M月d日 E"), style = MaterialTheme.typography.titleMedium)
+            // V1.6.1：补年份；加 weight 防止日期变长后把节假日标签挤出屏幕
+            Text(
+                formatDate(day, "yyyy年M月d日 E"),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f, fill = false)
+            )
             lunar.festival?.let {
                 Surface(color = MaterialTheme.colorScheme.errorContainer, shape = RoundedCornerShape(50),
                     modifier = Modifier.padding(start = 8.dp)) {
@@ -777,7 +782,7 @@ private fun WeekItemCard(item: WeekCalItem) {
                 Text(item.title, style = MaterialTheme.typography.bodyLarge, maxLines = 1,
                     textDecoration = if (item.done) TextDecoration.LineThrough else null,
                     color = if (item.done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface)
-                Text("${formatDate(item.time, "M/d")} ${item.sub}", style = MaterialTheme.typography.labelSmall,
+                Text("${formatDate(item.time)} ${item.sub}", style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (item.repeat != null) {
@@ -1136,6 +1141,22 @@ private fun DeleteScheduleDialog(
 }
 
 // ===== 时间工具 =====
+
+/**
+ * 周视图标题：完整显示起止日期且带年份（跨年后不会混淆）。
+ * 起止同年时年份只出现一次（`2026年10月19日 - 10月25日`），
+ * 跨年则两端都带年份（`2026年12月29日 - 2027年1月4日`），避免顶栏标题过长。
+ */
+private fun weekRangeLabel(ws: Long): String {
+    val we = ws + 6 * DAY_MS
+    val y1 = java.util.Calendar.getInstance().apply { timeInMillis = ws }.get(java.util.Calendar.YEAR)
+    val y2 = java.util.Calendar.getInstance().apply { timeInMillis = we }.get(java.util.Calendar.YEAR)
+    return if (y1 == y2) {
+        "${formatDate(ws)} - ${formatDate(we, "M月d日")}"
+    } else {
+        "${formatDate(ws)} - ${formatDate(we)}"
+    }
+}
 
 private fun dayOfWeekValue(ts: Long): Int {
     val c = Calendar.getInstance().apply { timeInMillis = ts }

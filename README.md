@@ -16,9 +16,9 @@
 | :---: | :---: | :---: | :---: |
 | <img src="docs/screenshots/01-home.png" width="180" alt="首页"> | <img src="docs/screenshots/02-todo.png" width="180" alt="待办"> | <img src="docs/screenshots/03-calendar.png" width="180" alt="日程"> | <img src="docs/screenshots/04-notes.png" width="180" alt="笔记"> |
 
-| 目标 | 统计报表 | 我的 |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/05-goals.png" width="180" alt="目标"> | <img src="docs/screenshots/06-reports.png" width="180" alt="统计报表"> | <img src="docs/screenshots/07-settings.png" width="180" alt="我的"> |
+| 目标 | 统计报表 | 我的 | 日志填写 |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/05-goals.png" width="180" alt="目标"> | <img src="docs/screenshots/06-reports.png" width="180" alt="统计报表"> | <img src="docs/screenshots/07-settings.png" width="180" alt="我的"> | <img src="docs/screenshots/08-log-fill.png" width="180" alt="日志填写"> |
 
 > 截图由 `ScreenshotGeneratorTest`（Robolectric 原生图形模式）在 JVM 内真实渲染生成，
 > 预置了演示数据以便直观看到界面状态。重新生成：
@@ -747,6 +747,36 @@ PersonalWorkbench.exe --on-top                 # 窗口置顶
 ### 验证
 - `./gradlew testDebugUnitTest assembleRelease` BUILD SUCCESSFUL；release `app/build/outputs/apk/release/PersonalWorkbench-1.6.0-release.apk`（v2+v3 签名），SHA-256 `16f61a8fcf4b372c9c49d34aae118898fb6baac0b58a17451e2e3566f5fe4970`。
 - DB v9 迁移已注册（MIGRATION_8_9）。
+
+## 三·三十二、V1.6.1 四项修复与优化
+
+版本号 `versionName 1.6.1 / versionCode 32`。数据库结构不变（仍为 version 9）。
+
+### 1. 时间显示补齐年份
+- `util/DateUtils.kt` 的 `formatDate` 默认格式由 `M月d日` 改为 **`yyyy年M月d日`**，`formatDateTime` 由 `M月d日 HH:mm` 改为 **`yyyy年M月d日 HH:mm`**。一处改动惠及所有使用默认格式的调用点，避免跨年后日期无法区分。
+- 同时修正了各处**显式传入**短格式的位置：日志列表标题与「更新于」、待办截止日期、全局搜索截止日期、日历日/周视图标题与日程列表、报表农历亮点。
+- 空间受限处改为「年份 / 月日」两行堆叠而非截断：报表「工作日志」汇总卡、工程甘特图日期列。
+- 周视图/周报标题采用「同年只显示一次年份」写法（`2026年10月19日 - 10月25日`），跨年时两端都带年份。
+- **例外**：报表柱状图 X 轴标签保留紧凑短格式 `formatShortDate`（柱子密集时完整日期会互相重叠），年份由本期报告标题承载。
+
+### 2. 每日打卡记录排序
+- 根因：`goal_records.record_date` 存的是**完整时间戳**（含时分秒）而非当日零点，原先 `ORDER BY record_date DESC` 只按绝对时刻降序，同日多条记录的顺序与需求相反。
+- `GoalDao.observeRecords` / `getRecordsInRange` 改为 `ORDER BY date(record_date / 1000, 'unixepoch', 'localtime') DESC, record_date ASC`：日期由近及远，**同一天内按打卡时刻从早到晚**。
+- 新增记录即时刷新：`records` 直接透传 Room `Flow`，写入即触发 `InvalidationTracker` 重发射，无需手动刷新。
+- `RecordRow` 改为显示 `formatDateTime`（日期 + 时刻），同一天多次打卡可区分。
+
+### 3. 日志填写页顶栏重排
+- 新增 `LogFillTopBar`：日期为主标题（`titleMedium` + SemiBold）并注明「点击切换日期」，状态说明降为次级信息（`labelSmall`）。
+- 「保存」由纯图标升级为**带文字的主色按钮**，操作入口更明确。
+- 适配：< 600dp（Compact）时收起预览切换按钮改由溢出菜单承载，避免标题与操作区互相挤压；日期单行省略，永不遮挡操作按钮。
+
+### 4. 应用内历史更新记录补全
+- `ui/settings/Changelog.kt` 新增 `date` 字段，并按版本号倒序补全 **31 个历史版本**（此前只到 V1.4.7，缺 V1.5.0~V1.6.0 共 8 个版本及 V1.2.1/1.2.2/1.3.1）。
+- 「历史更新记录」对话框以 chip 形式展示每条的更新日期，版本号 / 日期 / 标题三层信息层次清晰。
+
+### 验证
+- 新增 `DateFormatAndRecordOrderTest`（6 个用例）：覆盖默认格式含年份、跨年可区分、跨天倒序、同日升序、新增记录后顺序正确、`getRecordsInRange` 同样有序。
+- `./gradlew testDebugUnitTest` BUILD SUCCESSFUL，**84 / 84 全绿**。
 
 ## 三·二十五、V1.5.1 每日打卡合并分组 + 高级日期筛选
 

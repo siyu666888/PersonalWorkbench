@@ -21,6 +21,7 @@ import com.example.personalworkbench.ui.LocalWindowSizeClass
 import com.example.personalworkbench.ui.calendar.CalendarScreen
 import com.example.personalworkbench.ui.goals.GoalsScreen
 import com.example.personalworkbench.ui.home.HomeScreen
+import com.example.personalworkbench.ui.logs.LogFillScreen
 import com.example.personalworkbench.ui.notes.NotesScreen
 import com.example.personalworkbench.ui.reports.ReportsScreen
 import com.example.personalworkbench.ui.settings.SettingsScreen
@@ -193,6 +194,16 @@ class ScreenshotGeneratorTest {
     @Test
     fun shot_07_settings() = shot("07-settings") {
         SettingsScreen(nav = rememberNavController(), container = container)
+    }
+
+    /** V1.6.1 顶栏重排的视觉验证：日志填写页（含日期主标题 / 状态副标题 / 保存按钮） */
+    @Test
+    fun shot_08_log_fill() = shot("08-log-fill") {
+        LogFillScreen(
+            nav = rememberNavController(),
+            container = container,
+            date = com.example.personalworkbench.util.dayStartMillis(System.currentTimeMillis())
+        )
     }
 
     /** 预置演示数据 → 组装页面 → 等待稳定 → 截图落盘 */

@@ -954,7 +954,7 @@ private fun DailyCheckinItemRow(task: TaskEntity, onToggle: () -> Unit, onOpen: 
         CircleCheckbox(checked = done, onCheckedChange = { onToggle() }, modifier = Modifier.size(20.dp), size = 20.dp)
         Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
             Text(
-                formatDate(task.dueDate, "M月d日 E"),
+                formatDate(task.dueDate, "yyyy年M月d日 E"),
                 style = MaterialTheme.typography.bodyMedium,
                 textDecoration = if (done) TextDecoration.LineThrough else null,
                 color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,

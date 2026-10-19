@@ -148,7 +148,7 @@ fun HomeScreen(nav: NavHostController, container: AppContainer, refreshKey: Int 
                             )
                         )
                         Text(
-                            formatDate(System.currentTimeMillis(), "M月d日 E"),
+                            formatDate(System.currentTimeMillis(), "yyyy年M月d日 E"),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 2.dp)

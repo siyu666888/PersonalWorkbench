@@ -4,10 +4,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,8 +57,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -79,12 +84,127 @@ import com.example.personalworkbench.di.AppContainer
 import com.example.personalworkbench.ui.theme.LocalSemanticColors
 import com.example.personalworkbench.util.MarkdownUtil
 import com.example.personalworkbench.util.dayStartMillis
+import com.example.personalworkbench.ui.LocalWindowSizeClass
 import com.example.personalworkbench.util.formatDate
 import com.example.personalworkbench.util.weekOfYear
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+
+/**
+ * 日志填写页顶栏（V1.6.1 重做）。
+ *
+ * 原实现把「日期 + 状态」塞进一个 TextButton 当标题，返回/预览/保存/更多四个操作
+ * 全部平铺在右侧，窄屏（<600dp）上日期与操作区会互相挤压，且「保存」只是一个
+ * 对勾图标、层级不清。现在按下述原则重排：
+ *
+ * - **层级**：一级是日志日期（[title]，加粗、可点换日期 → 带日历图标表明可交互）；
+ *   二级是状态说明（labelSmall、次级色）；[actions] 只保留主要操作。
+ * - **操作入口**：「保存」升级为带文字的主色按钮，不再只有图标；
+ *   「预览」在窄屏收进溢出菜单，避免把日期挤到省略号。
+ * - **适配**：小于 600dp 视为紧凑屏，只显示返回 + 保存 + 更多；
+ *   中等以上另外显示预览切换。日期单行省略，永不遮挡操作区。
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LogFillTopBar(
+    dateMs: Long,
+    isToday: Boolean,
+    existing: Any?,
+    plainLength: Int,
+    preview: Boolean,
+    compact: Boolean,
+    onBack: () -> Unit,
+    onPickDate: () -> Unit,
+    onTogglePreview: () -> Unit,
+    onMore: () -> Unit,
+    onSave: () -> Unit,
+    menu: Boolean,
+    onDismissMenu: () -> Unit,
+    onDelete: () -> Unit
+) {
+    TopAppBar(
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+            }
+        },
+        title = {
+            // 日期 + 状态的整体点击热区：换日期
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.small)
+                    .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onPickDate)
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Outlined.Article,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(6.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        formatDate(dateMs) + if (isToday) " · 今天" else "",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        if (existing == null) "尚未填写 · 点击切换日期" else "已有 $plainLength 字 · 点击切换日期",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        },
+        actions = {
+            // 中等宽度以上才单独放预览切换，窄屏交由溢出菜单承载
+            if (!compact) {
+                IconButton(onClick = onTogglePreview) {
+                    Icon(
+                        if (preview) Icons.Filled.Edit else Icons.Filled.Visibility,
+                        contentDescription = if (preview) "继续编辑" else "预览排版"
+                    )
+                }
+            }
+            // 保存：带文字的主色按钮，操作入口比图标更明确
+            TextButton(onClick = onSave, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(4.dp))
+                Text("保存", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            }
+            IconButton(onClick = onMore) {
+                Icon(Icons.Outlined.MoreVert, contentDescription = "更多")
+            }
+            DropdownMenu(expanded = menu, onDismissRequest = onDismissMenu) {
+                DropdownMenuItem(text = { Text("保存") }, onClick = { onDismissMenu(); onSave() })
+                DropdownMenuItem(
+                    text = { Text(if (preview) "切到编辑" else "预览排版") },
+                    onClick = { onDismissMenu(); onTogglePreview() }
+                )
+                if (existing != null) {
+                    DropdownMenuItem(
+                        text = { Text("删除本日日志", color = MaterialTheme.colorScheme.error) },
+                        onClick = { onDismissMenu(); onDelete() }
+                    )
+                }
+            }
+        }
+    )
+}
 
 /**
  * 日志编辑页（V1.4.1 升级为富文本）
@@ -134,6 +254,9 @@ fun LogFillScreen(nav: NavHostController, container: AppContainer, date: Long) {
     val plain = remember(value.text) { MarkdownUtil.stripMarkdown(value.text) }
     val isToday = uiDate == today
 
+    // V1.6.1：窄屏（<600dp）收起预览切换按钮，避免标题日期与操作区互相挤压
+    val compactWidth = LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Compact
+
     fun doSave() {
         scope.launch { repo.save(uiDate, value.text); nav.popBackStack() }
     }
@@ -143,53 +266,21 @@ fun LogFillScreen(nav: NavHostController, container: AppContainer, date: Long) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    TextButton(onClick = { showDate = true }) {
-                        Column {
-                            Text(
-                                formatDate(uiDate, "yyyy年M月d日") + if (isToday) " · 今天" else "",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                if (existing == null) "尚未填写" else "已有 ${plain.length} 字",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { nav.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                actions = {
-                    // 编辑 / 预览 切换
-                    IconButton(onClick = { preview = !preview }) {
-                        Icon(
-                            if (preview) Icons.Filled.Edit else Icons.Filled.Visibility,
-                            contentDescription = if (preview) "继续编辑" else "预览排版"
-                        )
-                    }
-                    IconButton(onClick = { doSave() }) {
-                        Icon(Icons.Filled.Check, contentDescription = "保存", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, contentDescription = "更多") }
-                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text("保存") }, onClick = { menu = false; doSave() })
-                        DropdownMenuItem(
-                            text = { Text(if (preview) "切到编辑" else "预览排版") },
-                            onClick = { menu = false; preview = !preview }
-                        )
-                        if (existing != null) {
-                            DropdownMenuItem(
-                                text = { Text("删除本日日志", color = MaterialTheme.colorScheme.error) },
-                                onClick = { menu = false; doDelete() }
-                            )
-                        }
-                    }
-                }
+            LogFillTopBar(
+                dateMs = uiDate,
+                isToday = isToday,
+                existing = existing,
+                plainLength = plain.length,
+                preview = preview,
+                compact = compactWidth,
+                onBack = { nav.popBackStack() },
+                onPickDate = { showDate = true },
+                onTogglePreview = { preview = !preview },
+                onMore = { menu = true },
+                onSave = { doSave() },
+                menu = menu,
+                onDismissMenu = { menu = false },
+                onDelete = { doDelete() }
             )
         }
     ) { padding ->
