@@ -1,5 +1,8 @@
 # 个人工作台 APP（Personal Workbench）
 
+[![CI](https://github.com/siyu666888/PersonalWorkbench/actions/workflows/ci.yml/badge.svg)](https://github.com/siyu666888/PersonalWorkbench/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > 一站式个人效率中心 —— 让笔记、任务、日程、目标、项目和文件在同一个工作台内无缝流转。
 > 依据《个人工作台APP_PRD.docx》《个人工作台APP_UI设计规范.docx》《个人工作台APP_Figma标注导出规范.docx》开发。
 
@@ -1022,3 +1025,8 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 - [x] 平板/折叠屏自适应（WindowSizeClass 2/3/4 列 + 内容区 880dp 上限）— 已实现 (V1.4.0)
 - [x] 备份内容从「整库 zip」升级为「可读 JSON 快照」（自动含新表，恢复无需重启）— 已升级 (V1.4.0)
 - [x] 本机安装可做 app 测试的模拟器（emulator + system-images;android-34;default;x86_64 + AVD Pixel_API34）— 已就绪 (V1.4.0)
+
+## 九、贡献与许可
+
+- **欢迎贡献**：报 Bug、提功能建议、改进界面与测试都欢迎。请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)：含本地构建命令、代码约定、数据库迁移注意事项与 PR 检查清单。
+- **许可证**：本项目采用 [MIT License](LICENSE) —— 允许自由使用、修改与分发（保留版权声明即可），商用亦无限制。
