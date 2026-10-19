@@ -1,0 +1,79 @@
+<resources>
+    <string name="app_name">个人工作台</string>
+
+    <!-- 底部导航 -->
+    <string name="nav_home">首页</string>
+    <string name="nav_todo">待办</string>
+    <string name="nav_note">笔记</string>
+    <string name="nav_calendar">日程</string>
+    <string name="nav_settings">我的</string>
+
+    <!-- 通用 -->
+    <string name="action_save">保存</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_delete">删除</string>
+    <string name="action_confirm">确定</string>
+    <string name="action_create">新建</string>
+    <string name="action_search">搜索</string>
+    <string name="action_edit">编辑</string>
+    <string name="action_more">更多</string>
+    <string name="empty">暂无内容</string>
+
+    <!-- 待办 -->
+    <string name="todo_title">待办</string>
+    <string name="todo_empty">还没有待办，点击 + 创建第一个任务</string>
+    <string name="todo_overdue">逾期</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_active">进行中</string>
+    <string name="filter_done">已完成</string>
+    <string name="filter_overdue">逾期</string>
+    <string name="priority_high">高</string>
+    <string name="priority_medium">中</string>
+    <string name="priority_low">低</string>
+
+    <!-- 笔记 -->
+    <string name="note_title">笔记</string>
+    <string name="note_empty">还没有笔记，开始记录你的第一个想法</string>
+    <string name="note_saved">已保存</string>
+    <string name="note_saving">保存中…</string>
+    <string name="note_unsaved">未保存</string>
+    <string name="note_save_failed">保存失败，请检查存储空间</string>
+
+    <!-- 日程 -->
+    <string name="calendar_title">日程</string>
+    <string name="calendar_empty">本月暂无日程，点击日期添加</string>
+    <string name="view_month">月</string>
+    <string name="view_week">周</string>
+    <string name="view_day">日</string>
+    <string name="today">今天</string>
+
+    <!-- 目标 -->
+    <string name="goal_title">目标</string>
+    <string name="goal_empty">设定你的第一个目标，让每一天都有方向</string>
+    <string name="goal_type_numeric">数值型</string>
+    <string name="goal_type_habit">习惯型</string>
+    <string name="goal_type_milestone">里程碑型</string>
+    <string name="achievement_wall">成就墙</string>
+
+    <!-- 文件 -->
+    <string name="file_title">文件</string>
+    <string name="file_empty">还没有文件，点击 + 添加</string>
+    <string name="file_uninstall_warning">您的文件存储在 APP 私有目录，卸载将丢失全部数据，请定期导出备份</string>
+
+    <!-- 设置 -->
+    <string name="settings_title">我的</string>
+    <string name="settings_theme">外观</string>
+    <string name="settings_backup">数据备份</string>
+    <string name="settings_restore">数据恢复</string>
+    <string name="settings_app_lock">应用锁</string>
+    <string name="settings_recycle_bin">回收站</string>
+    <string name="settings_about">关于</string>
+
+    <!-- 提醒 -->
+    <string name="reminder_permission_title">开启通知权限</string>
+    <string name="reminder_permission_desc">提醒功能依赖通知权限，请前往系统设置开启。</string>
+    <string name="reminder_banner">提醒可能不生效，请检查通知权限</string>
+
+    <!-- 备份提醒 -->
+    <string name="backup_toast">您的数据存储在 APP 私有目录，卸载将丢失所有文件，请定期导出备份</string>
+</resources>

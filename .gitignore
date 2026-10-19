@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+app/build/
+local.properties
+
+# 签名与密钥（严禁提交）
+*.jks
+*.keystore
+*.p12
+keystore.properties
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 构建产物
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# Windows 保留设备名误产生的 0 字节残留文件（无法直接删除，纳入忽略）
+/nul

@@ -1,0 +1,67 @@
+package com.example.personalworkbench.data.local.dao
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
+import com.example.personalworkbench.data.local.entities.GoalEntity
+import com.example.personalworkbench.data.local.entities.GoalMilestoneEntity
+import com.example.personalworkbench.data.local.entities.GoalRecordEntity
+import com.example.personalworkbench.data.local.entities.GoalStatus
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface GoalDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(goal: GoalEntity): Long
+
+    @Update
+    suspend fun update(goal: GoalEntity)
+
+    @Delete
+    suspend fun delete(goal: GoalEntity)
+
+    @Query("SELECT * FROM goals WHERE id = :id")
+    suspend fun getById(id: Long): GoalEntity?
+
+    @Query("SELECT * FROM goals WHERE status != 'COMPLETED' ORDER BY updated_at DESC")
+    fun observeActive(): Flow<List<GoalEntity>>
+
+    @Query("SELECT * FROM goals WHERE status = 'COMPLETED' ORDER BY completed_at DESC")
+    fun observeCompleted(): Flow<List<GoalEntity>>
+
+    // ---- goal_records ----
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRecord(record: GoalRecordEntity): Long
+
+    // 记录流水按时间由近及远（最新在上，用户需求 V1.6.0）；
+    // 统计类消费方（连续天数/汇总/maxByOrNull）均为顺序无关，可安全改序
+    @Query("SELECT * FROM goal_records WHERE goal_id = :goalId ORDER BY record_date DESC")
+    fun observeRecords(goalId: Long): Flow<List<GoalRecordEntity>>
+
+    @Query("SELECT * FROM goal_records WHERE goal_id = :goalId ORDER BY record_date ASC")
+    suspend fun getRecords(goalId: Long): List<GoalRecordEntity>
+
+    @Query("SELECT * FROM goal_records WHERE goal_id = :goalId AND record_date BETWEEN :start AND :end")
+    suspend fun getRecordsInRange(goalId: Long, start: Long, end: Long): List<GoalRecordEntity>
+
+    // ---- goal_milestones ----
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMilestone(m: GoalMilestoneEntity): Long
+
+    @Update
+    suspend fun updateMilestone(m: GoalMilestoneEntity)
+
+    @Delete
+    suspend fun deleteMilestone(m: GoalMilestoneEntity)
+
+    @Query("SELECT * FROM goal_milestones WHERE goal_id = :goalId ORDER BY order_index ASC")
+    fun observeMilestones(goalId: Long): Flow<List<GoalMilestoneEntity>>
+
+    @Query("SELECT * FROM goal_milestones WHERE goal_id = :goalId ORDER BY order_index ASC")
+    suspend fun getMilestones(goalId: Long): List<GoalMilestoneEntity>
+}

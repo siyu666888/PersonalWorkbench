@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 快捷入口 · 日志填写：拟物化剪贴板 + 文字行，配色与报表图标同一套 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- ground shadow -->
+    <path android:pathData="M12,22.2 m-7.6,0 a7.6,0.78 0 1 0 15.2,0 a7.6,0.78 0 1 0 -15.2,0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="4.4" android:startY="21.4" android:endX="19.6" android:endY="23.0">
+                <item android:offset="0" android:color="#00000000"/>
+                <item android:offset="1" android:color="#40000000"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- paper body -->
+    <path android:pathData="M4.6,4.6 h14.8 a1.6,1.6 0 0 1 1.6,1.6 v13.0 a1.6,1.6 0 0 1 -1.6,1.6 h-14.8 a1.6,1.6 0 0 1 -1.6,-1.6 v-13.0 a1.6,1.6 0 0 1 1.6,-1.6 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="3.0" android:startY="4.6" android:endX="20.4" android:endY="20.8">
+                <item android:offset="0" android:color="#FFFFFFFF"/>
+                <item android:offset="1" android:color="#FFEDE0CC"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- header band -->
+    <path android:pathData="M4.6,4.6 h14.8 a1.6,1.6 0 0 1 1.6,1.6 v1.0 h-18.0 v-1.0 a1.6,1.6 0 0 1 1.6,-1.6 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="3.0" android:startY="4.6" android:endX="20.4" android:endY="7.2">
+                <item android:offset="0" android:color="#FF6FD0C8"/>
+                <item android:offset="1" android:color="#FF2E8C86"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- clip at top -->
+    <path android:pathData="M9.6,3.4 h4.8 a1.0,1.0 0 0 1 1.0,1.0 v0.8 h-6.8 v-0.8 a1.0,1.0 0 0 1 1.0,-1.0 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="9.6" android:startY="3.4" android:endX="15.4" android:endY="5.2">
+                <item android:offset="0" android:color="#FFB39DFF"/>
+                <item android:offset="1" android:color="#FF7A5AF0"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- text lines -->
+    <path android:pathData="M6.2,11.4 h11.6 v1.5 h-11.6 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="6.2" android:startY="11.4" android:endX="17.8" android:endY="12.9">
+                <item android:offset="0" android:color="#FF4FB3AC"/>
+                <item android:offset="1" android:color="#FF2A7A75"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M6.2,14.4 h11.6 v1.5 h-11.6 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="6.2" android:startY="14.4" android:endX="17.8" android:endY="15.9">
+                <item android:offset="0" android:color="#FFFF9A62"/>
+                <item android:offset="1" android:color="#FFF2552E"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M6.2,17.4 h7.6 v1.5 h-7.6 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="6.2" android:startY="17.4" android:endX="13.8" android:endY="18.9">
+                <item android:offset="0" android:color="#FFB39DFF"/>
+                <item android:offset="1" android:color="#FF7A5AF0"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- paper outline -->
+    <path
+        android:pathData="M4.6,4.6 h14.8 a1.6,1.6 0 0 1 1.6,1.6 v13.0 a1.6,1.6 0 0 1 -1.6,1.6 h-14.8 a1.6,1.6 0 0 1 -1.6,-1.6 v-13.0 a1.6,1.6 0 0 1 1.6,-1.6 z"
+        android:strokeColor="#335A4632"
+        android:strokeWidth="0.34" />
+
+</vector>

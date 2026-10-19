@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  分享崩溃日志用：只暴露 filesDir/crash 这一个目录，
+  其余应用私有文件（数据库、备份、附件）一律不可被外部应用拿到。
+-->
+<paths>
+    <files-path
+        name="crash_logs"
+        path="crash/" />
+    <!-- V1.5.6 模块七：文件管理「一键导出/分享」需要把 APP 私有目录下的
+         用户导入文件（files/files/）经 FileProvider 分享给其他应用 -->
+    <files-path
+        name="attachments"
+        path="files/" />
+    <!-- V1.6.0：备份记录页「手动分享」需要分享 getExternalFilesDir(null)/backups 下的备份文件 -->
+    <external-files-path
+        name="backups"
+        path="backups/" />
+</paths>

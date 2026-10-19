@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  个人工作台 APP - 启动主题 (浅色)
+
+  说明: 本项目为纯 Jetpack Compose 应用(Compose Material3)，所有配色/圆角/字体由
+  ui/theme/ 中的 PersonalWorkbenchTheme 在 Compose 层接管。
+  Material3 的 XML 属性(colorPrimary 等)属于 Material Components **View** 库，
+  Compose Material3 不提供这些 attr，因此此处不引入 View 库依赖，
+  仅保留窗口基础属性，避免 APK 无谓增大。
+-->
+<resources>
+    <style name="Theme.PersonalWorkbench" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/colorSurface</item>
+        <item name="android:statusBarColor">@color/colorSurface</item>
+        <item name="android:navigationBarColor">@color/colorSurface</item>
+    </style>
+</resources>

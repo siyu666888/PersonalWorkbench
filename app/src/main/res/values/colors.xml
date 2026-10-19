@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 个人工作台 APP - 颜色 Token (浅色主题) 来源: UI设计规范 1.2 / Figma标注规范 2.2 -->
+<resources>
+    <!-- Global / Primitive Colors -->
+    <color name="global_color_purple_100">#EADDFF</color>
+    <color name="global_color_purple_200">#D0BCFF</color>
+    <color name="global_color_purple_500">#6750A4</color>
+    <color name="global_color_purple_700">#4F378B</color>
+    <color name="global_color_purple_900">#21005D</color>
+    <color name="global_color_white">#FFFFFF</color>
+    <color name="global_color_surface_0">#FEF7FF</color>
+    <color name="global_color_surface_1">#F7F2FA</color>
+    <color name="global_color_surface_2">#E7E0EC</color>
+    <color name="global_color_gray_900">#1D1B20</color>
+    <color name="global_color_gray_500">#49454F</color>
+    <color name="global_color_gray_400">#79747E</color>
+    <color name="global_color_error_500">#B3261E</color>
+    <color name="global_color_error_300">#F2B8B5</color>
+
+    <!-- Semantic Colors (浅色) -->
+    <color name="seed">#6750A4</color>
+    <color name="colorPrimary">#6750A4</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorPrimaryContainer">#EADDFF</color>
+    <color name="colorOnPrimaryContainer">#21005D</color>
+    <color name="colorSecondary">#625B71</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorSecondaryContainer">#E8DEF8</color>
+    <color name="colorTertiary">#7D5260</color>
+    <color name="colorOnTertiary">#FFFFFF</color>
+    <color name="colorTertiaryContainer">#FFD8E4</color>
+    <color name="colorSurface">#FEF7FF</color>
+    <color name="colorOnSurface">#1D1B20</color>
+    <color name="colorOnSurfaceVariant">#49454F</color>
+    <color name="colorSurfaceContainer">#F7F2FA</color>
+    <color name="colorSurfaceContainerHigh">#ECE6F0</color>
+    <color name="colorSurfaceContainerHighest">#E6E0E9</color>
+    <color name="colorOutline">#79747E</color>
+    <color name="colorError">#B3261E</color>
+    <color name="colorOnError">#FFFFFF</color>
+    <color name="colorErrorContainer">#F9DEDC</color>
+    <color name="colorOnErrorContainer">#410E0B</color>
+
+    <!-- 功能语义色 (UI规范 1.2) -->
+    <color name="colorSuccess">#4CAF50</color>
+    <color name="colorWarning">#FF9800</color>
+    <color name="colorDanger">#F44336</color>
+    <color name="colorInfo">#2196F3</color>
+</resources>

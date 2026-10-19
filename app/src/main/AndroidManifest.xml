@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 通知：待办/日程/目标提醒本地推送 (Android 13+ 需 POST_NOTIFICATIONS) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- 网络：V1.3.8 AI 助手可选接入云端免费大模型（OpenAI 兼容接口） -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 相机：拍照上传文件 / 工程现场问题拍照 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- 定位：仅工程模块「现场问题记录」使用 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- 生物识别：应用锁 -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <!--
+      WorkManager 库清单会带入 FOREGROUND_SERVICE（供 expedited 任务用）。
+      本项目没有任何 Service，也未使用 setExpedited，故用合并器规则剔除，
+      避免向用户暴露用不到的能力。
+    -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE"
+        tools:node="remove" />
+
+    <!-- 存储：Android 13+ 使用 Scoped Storage / SAF，以下为兼容低版本 -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"
+        tools:ignore="ScopedStorage" />
+
+    <application
+        android:name=".PersonalWorkbenchApp"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PersonalWorkbench"
+        tools:targetApi="31">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.PersonalWorkbench"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 本地提醒由 WorkManager 驱动（reminder 包），无需静态广播接收器 -->
+
+        <!-- 分享崩溃日志：仅授权 filesDir/crash 目录，导出/导入权限由调用方临时授予 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+</manifest>

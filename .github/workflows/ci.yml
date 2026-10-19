@@ -1,0 +1,77 @@
+name: Android CI
+
+# T1：初始化 Git 仓库 + GitHub Actions 流水线（V1.6.0 后续建议）
+# - push/PR 到主分支：跑单元测试(Robolectric) + 构建 debug 包（无需密钥）
+# - 配置了 GitHub Secrets 后：额外构建并校验签名 release 包，作为产物上传
+#   所需 Secrets（仓库 Settings → Secrets → Actions）：
+#     KEYSTORE_BASE64    : 本地 release keystore 的 base64（例如 certutil -encode release.jks release.b64 后去掉首尾行）
+#     KEYSTORE_PASSWORD  : keystore.properties 中的 storePassword
+#     KEY_ALIAS          : keystore.properties 中的 keyAlias
+#     KEY_PASSWORD       : keystore.properties 中的 keyPassword
+#   未配置 Secrets 时，release 步骤自动跳过，CI 仍可正常通过（适合 fork / 外部 PR）。
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages & accept licenses
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run unit tests (Robolectric)
+        run: ./gradlew testDebugUnitTest --no-daemon
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Build & sign release APK (requires secrets)
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "${{ github.workspace }}/release-key.jks"
+          cat > keystore.properties <<EOF
+          storeFile=${{ github.workspace }}/release-key.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+          ./gradlew assembleRelease --no-daemon
+          $ANDROID_HOME/build-tools/34.0.0/apksigner verify app/build/outputs/apk/release/*.apk
+
+      - name: Upload APK artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apks
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+          if-no-files-found: ignore

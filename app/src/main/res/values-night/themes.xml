@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 个人工作台 APP - 启动主题 (深色)：仅影响 Compose 接管前的一瞬窗口背景 -->
+<resources>
+    <style name="Theme.PersonalWorkbench" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/colorSurface</item>
+        <item name="android:statusBarColor">@color/colorSurface</item>
+        <item name="android:navigationBarColor">@color/colorSurface</item>
+    </style>
+</resources>

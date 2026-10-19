@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive icon 背景：取自新图标的浅薄荷 -> 浅青渐变 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="18"
+                android:startY="6"
+                android:endX="96"
+                android:endY="108">
+                <item android:color="#FFF2FCFC" android:offset="0" />
+                <item android:color="#FFE4F7F9" android:offset="0.5" />
+                <item android:color="#FFA9DFE3" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>

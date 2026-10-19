@@ -1,0 +1,24 @@
+# 跨平台换行与二进制规范化（T1 初始化仓库时补充）
+# 文本文件统一以 LF 入库，检出时按平台转换；二进制文件不转换、不触发 diff。
+
+* text=auto eol=lf
+
+# Windows 批处理需 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 二进制资源
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.svg text
+*.jar binary
+*.jks binary
+*.keystore binary
+*.ttf binary
+*.otf binary
+*.apk binary
+*.aab binary

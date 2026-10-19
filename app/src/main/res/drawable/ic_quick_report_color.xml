@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 快捷入口 · 报表：拟物化数据卡片 + 彩色柱状图 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- ground shadow -->
+    <path android:pathData="M12,22.2 m-7.6,0 a7.6,0.78 0 1 0 15.2,0 a7.6,0.78 0 1 0 -15.2,0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="4.4" android:startY="21.4" android:endX="19.6" android:endY="23.0">
+                <item android:offset="0" android:color="#00000000"/>
+                <item android:offset="1" android:color="#40000000"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- card body -->
+    <path android:pathData="M4.3,2.6 h15.4 a1.7,1.7 0 0 1 1.7,1.7 v15.4 a1.7,1.7 0 0 1 -1.7,1.7 h-15.4 a1.7,1.7 0 0 1 -1.7,-1.7 v-15.4 a1.7,1.7 0 0 1 1.7,-1.7 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="2.6" android:startY="2.6" android:endX="21.4" android:endY="21.4">
+                <item android:offset="0" android:color="#FFFFFFFF"/>
+                <item android:offset="1" android:color="#FFEDE0CC"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- header band -->
+    <path android:pathData="M4.3,2.6 h15.4 a1.7,1.7 0 0 1 1.7,1.7 v1.1 h-18.8 v-1.1 a1.7,1.7 0 0 1 1.7,-1.7 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="2.6" android:startY="2.6" android:endX="21.4" android:endY="5.4">
+                <item android:offset="0" android:color="#FF6FD0C8"/>
+                <item android:offset="1" android:color="#FF2E8C86"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- header gloss -->
+    <path android:pathData="M4.0,3.0 h16.0 v0.5 h-16.0 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="4.0" android:startY="3.0" android:endX="20.0" android:endY="3.5">
+                <item android:offset="0" android:color="#73FFFFFF"/>
+                <item android:offset="1" android:color="#00FFFFFF"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- bars -->
+    <path android:pathData="M5.5,14.3 h2.5 v5.4 h-2.5 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="5.5" android:startY="14.3" android:endX="8.0" android:endY="19.7">
+                <item android:offset="0" android:color="#FFFF9A62"/>
+                <item android:offset="1" android:color="#FFF2552E"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M9.8,10.4 h2.5 v9.3 h-2.5 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="9.8" android:startY="10.4" android:endX="12.3" android:endY="19.7">
+                <item android:offset="0" android:color="#FF4FB3AC"/>
+                <item android:offset="1" android:color="#FF2A7A75"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M14.1,12.6 h2.5 v7.1 h-2.5 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="14.1" android:startY="12.6" android:endX="16.6" android:endY="19.7">
+                <item android:offset="0" android:color="#FFB39DFF"/>
+                <item android:offset="1" android:color="#FF7A5AF0"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- baseline -->
+    <path android:pathData="M4.8,19.7 h13.4 v0.62 h-13.4 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="4.8" android:startY="19.7" android:endX="18.2" android:endY="20.3">
+                <item android:offset="0" android:color="#FFC9B79A"/>
+                <item android:offset="1" android:color="#FFA08D74"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- card outline -->
+    <path
+        android:pathData="M4.3,2.6 h15.4 a1.7,1.7 0 0 1 1.7,1.7 v15.4 a1.7,1.7 0 0 1 -1.7,1.7 h-15.4 a1.7,1.7 0 0 1 -1.7,-1.7 v-15.4 a1.7,1.7 0 0 1 1.7,-1.7 z"
+        android:strokeColor="#335A4632"
+        android:strokeWidth="0.34" />
+
+</vector>

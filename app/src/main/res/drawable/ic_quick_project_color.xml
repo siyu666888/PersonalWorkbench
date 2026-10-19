@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 快捷入口 · 项目：拟物化施工楼体 + 塔吊 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- ground shadow -->
+    <path android:pathData="M12,21.9 m-8.6,0 a8.6,0.8 0 1 0 17.2,0 a8.6,0.8 0 1 0 -17.2,0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="3.4" android:startY="21.1" android:endX="20.6" android:endY="22.7">
+                <item android:offset="0" android:color="#00000000"/>
+                <item android:offset="1" android:color="#40000000"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- ground slab -->
+    <path android:pathData="M2.4,20.0 h19.2 v1.1 h-19.2 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="2.4" android:startY="20.0" android:endX="21.6" android:endY="21.1">
+                <item android:offset="0" android:color="#FFD9E0E6"/>
+                <item android:offset="1" android:color="#FF9EAAB6"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- building body -->
+    <path android:pathData="M3.9,20.0 V6.5 A1.4,1.4 0 0 1 5.3,5.1 H12.5 A1.4,1.4 0 0 1 13.9,6.5 V20.0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="3.9" android:startY="5.1" android:endX="13.9" android:endY="20.0">
+                <item android:offset="0" android:color="#FF8FC3F7"/>
+                <item android:offset="1" android:color="#FF2F6FCB"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- building left highlight -->
+    <path android:pathData="M5.3,5.1 h1.0 v14.9 h-1.0 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="5.3" android:startY="5.1" android:endX="6.3" android:endY="20.0">
+                <item android:offset="0" android:color="#66FFFFFF"/>
+                <item android:offset="1" android:color="#00FFFFFF"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- building right shade -->
+    <path android:pathData="M12.4,5.1 h0.1 a1.4,1.4 0 0 1 1.4,1.4 V20.0 h-1.5 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="12.4" android:startY="5.1" android:endX="13.9" android:endY="20.0">
+                <item android:offset="0" android:color="#1A0B3F73"/>
+                <item android:offset="1" android:color="#380B3F73"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- windows -->
+    <path android:pathData="M6.4,7.3 h1.9 v1.6 h-1.9 z M9.4,7.3 h1.9 v1.6 h-1.9 z
+                          M6.4,10.6 h1.9 v1.6 h-1.9 z M9.4,10.6 h1.9 v1.6 h-1.9 z
+                          M6.4,13.9 h1.9 v1.6 h-1.9 z M9.4,13.9 h1.9 v1.6 h-1.9 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="6.4" android:startY="7.3" android:endX="11.3" android:endY="15.5">
+                <item android:offset="0" android:color="#FFFFFBF2"/>
+                <item android:offset="1" android:color="#FFFFE0B8"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- crane mast -->
+    <path android:pathData="M16.1,20.0 V2.6 h1.1 v17.4 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="16.1" android:startY="2.6" android:endX="17.2" android:endY="20.0">
+                <item android:offset="0" android:color="#FFE6ECF2"/>
+                <item android:offset="1" android:color="#FF8E9BA9"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- crane counter jib -->
+    <path android:pathData="M16.65,3.5 L12.9,4.4 L13.0,5.3 L16.65,4.6 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="12.9" android:startY="3.5" android:endX="16.65" android:endY="5.3">
+                <item android:offset="0" android:color="#FFE8A93C"/>
+                <item android:offset="1" android:color="#FFC97C18"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- crane jib -->
+    <path android:pathData="M16.65,3.1 L22.3,4.9 L22.1,6.0 L16.65,4.3 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="16.65" android:startY="3.1" android:endX="22.3" android:endY="6.0">
+                <item android:offset="0" android:color="#FFFFC65C"/>
+                <item android:offset="1" android:color="#FFF09A20"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- hoist cable -->
+    <path android:pathData="M20.55,5.5 V12.1 h0.36 V5.5 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="20.55" android:startY="5.5" android:endX="20.91" android:endY="12.1">
+                <item android:offset="0" android:color="#FF6B7683"/>
+                <item android:offset="1" android:color="#FF39424D"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- hoist block -->
+    <path android:pathData="M19.85,12.1 h1.15 v1.1 a0.58,0.58 0 0 1 -1.15,0 z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="19.85" android:startY="12.1" android:endX="21.0" android:endY="13.8">
+                <item android:offset="0" android:color="#FFFFC65C"/>
+                <item android:offset="1" android:color="#FFD98A16"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+</vector>
