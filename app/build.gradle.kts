@@ -120,6 +120,17 @@ android {
     }
 }
 
+// 测试失败时在控制台输出完整异常堆栈（含 Room「Migration didn't properly handle」的
+// expected/found 对比明细），否则 CI 日志只有首行，排障要多走一轮。
+tasks.withType<Test>().configureEach {
+    testLogging {
+        events("failed", "skipped")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStackTraces = true
+        showCauses = true
+    }
+}
+
 dependencies {
     // ---- 核心 ----
     implementation("androidx.core:core-ktx:1.13.1")
