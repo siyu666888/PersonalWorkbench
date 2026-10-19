@@ -36,13 +36,15 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
+      # ubuntu-latest 镜像已预装 Android SDK（ANDROID_HOME=/usr/local/lib/android/sdk），
+      # 无需 android-actions/setup-android（其新版会装已废弃的 tools 包而失败），
+      # 只需用预装 sdkmanager 补齐本项目所需的 platform/build-tools 并接受许可
       - name: Install SDK packages & accept licenses
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          SDKM="$(command -v sdkmanager || echo "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager")"
+          echo "sdkmanager: $SDKM"
+          yes | "$SDKM" --licenses > /dev/null 2>&1 || true
+          "$SDKM" "platforms;android-34" "build-tools;34.0.0" > /dev/null
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
