@@ -949,6 +949,23 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ## 七、后续 TODO
 
 - [x] 工程管理模块 UI（项目列表/详情、里程碑、人材机台账、现场问题、日报）— 已实现
+
+## 八、持续集成（CI）
+
+仓库已接入 GitHub Actions（`.github/workflows/ci.yml`）：
+- 推送 / PR 到 `main` / `master` / `develop`：自动运行 Robolectric 单元测试（`testDebugUnitTest`）+ 构建 debug 包。
+- 在仓库 **Settings → Secrets → Actions** 配置以下 Secrets 后，额外构建并签名 release 包（用 `apksigner` 校验），并将 APK 作为构建产物上传：
+  - `KEYSTORE_BASE64`：本地 release keystore 的 base64（如 `certutil -encode release.jks release.b64` 后去掉首尾行）
+  - `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD`：对应 `keystore.properties` 中的值
+- 未配置 Secrets 时 release 步骤自动跳过，CI 仍可正常通过（适配 fork / 外部 PR）。
+
+启用步骤：
+1. 在 GitHub 新建仓库（建议名 `PersonalWorkbench`）。
+2. 本地：`git remote add origin https://github.com/<用户名>/PersonalWorkbench.git`
+3. `git push -u origin main`
+4. 配置上述 Secrets，后续每次 push 即触发自动构建与测试。
+
+> 注：本仓库已设置本地提交身份占位（`user.name=sidey` / `user.email=sidey@local`），推送前请改用 `git config user.email <你的 GitHub 邮箱>` 改为真实邮箱以正确归属提交。
 - [x] 里程碑甘特图（按 planDate 排期可视化）— 已实现
 - [x] 周/日日程视图与全天日程时间轴 — 已实现
 - [x] 应用锁生物识别实际校验（BiometricPrompt）— 已实现
