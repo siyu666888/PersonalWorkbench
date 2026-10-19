@@ -1,0 +1,9 @@
+# 说明：本文件为 GitHub Issue 表单配置
+blank_issues_enabled: false
+contact_links:
+  - name: 提问 / 讨论（Q&A / Ideas）
+    url: https://github.com/siyu666888/PersonalWorkbench/discussions
+    about: 使用方法、想法交流、主题讨论请到 Discussions 区，那里更适合开放式讨论。
+  - name: 贡献代码
+    url: https://github.com/siyu666888/PersonalWorkbench/blob/main/CONTRIBUTING.md
+    about: 提交 PR 前请先阅读贡献指南，含本地构建命令、代码约定与数据库迁移注意事项。
