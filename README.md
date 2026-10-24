@@ -805,6 +805,30 @@ PersonalWorkbench.exe --on-top                 # 窗口置顶
 - `./gradlew :app:assembleRelease` BUILD SUCCESSFUL。正式版 `outputs/PersonalWorkbench-v1.6.2-release.apk`（**3,430,544 bytes**，v2 + v3 双签名，证书 `CN=PersonalWorkbench`，SHA-256 `84b3c9d68f8dc884024d3c7428ddaf1c15c98fbe5eeb3883edef0cc0fcc58272`）。
 - 混淆映射已归档 `outputs/mapping-v1.6.2.txt`。
 
+## 三·三十四、V1.6.3 UI 测试与迁移测试补齐 + 勾选框无障碍修复
+
+版本号 `versionName 1.6.3 / versionCode 34`。数据库结构不变（仍为 version 9）。
+
+### 1. 补上 UI 层自动化测试（技术债 D1）
+- 新增 `KeyUserFlowTest`（3 个用例）：此前项目只有工具层 / DAO 层单测，**没有 UI 层自动化**，而 V1.6.1 修的「跨年日期」「同日打卡顺序」恰好都是纯 UI 缺陷，正好落在盲区。
+  - 待办：渲染预置待办 → 点击勾选框 → 断言数据库变为完成态、且该项从未完成列表移除。
+  - 日志：输入正文 → 点「保存」→ 断言按日期可查到日志内容。
+  - 目标打卡：同日三条记录渲染后，三条时间文本必须互不相同（含年份 + 时刻），否则同日记录无法区分先后。
+- **顺带发现并修复一个真实缺陷**：自定义 `CircleCheckbox`（`Components.kt:418`）用 `clickable(role = Checkbox)`，**从未暴露 ToggleableState 语义**——无障碍服务读不出勾选状态，UI 测试也无法定位该节点。已改为 `toggleable(value = checked, role = Checkbox)`，点击行为不变、语义补齐。
+
+### 2. 数据库全链路迁移测试（技术债 D2）
+- 新增 `FullMigrationPathTest`：用 `app/schemas` 下各版本 schema JSON 原样建出「那个版本留下的数据库」，再让 Room 带 `Migrations.ALL` 打开，依次执行途中所有迁移并做全表校验。
+- 覆盖 **2→9、3→9、…、8→9 共 7 条升级路径**（无 1.json，V1.0 时期未开启 exportSchema，1→2 无法用此法回归）。此前仅 4→5 一条被 `StartupSmokeTest` 覆盖。
+- 校验点：升级后 `user_version` 必须为 9；核心表 `tasks / schedules / notes / goals / goal_records` 仍在；后期迁移新增的列（`tasks.schedule_id`、`schedules.task_id`、`goal_records.note`）确实建出。
+
+### 3. 更正一处统计错误
+- 此前记录的「11 处 TODO/FIXME」属**误统计**：那些全是 `Routes.TODO`、`ModuleType.TODO` 等「待办模块」常量。按注释模式精确检索后，真实 TODO/FIXME 注释为 **0 处**，ROADMAP 中该项已作废。
+
+### 验证
+- `./gradlew :app:testDebugUnitTest` BUILD SUCCESSFUL，测试总数由 85 增至 **95 / 95 全绿**（新增 7 个迁移用例 + 3 个 UI 用例）。
+- `./gradlew :app:assembleRelease` BUILD SUCCESSFUL。正式版 `outputs/PersonalWorkbench-v1.6.3-release.apk`（**3,430,540 bytes**，v2 + v3 双签名，证书 `CN=PersonalWorkbench`，SHA-256 `4ca1c1920c392f273b9bbf3e2238eb9d769f173cfcc513bbeae48a4fb777af90`）。
+- 混淆映射已归档 `outputs/mapping-v1.6.3.txt`。
+
 ## 三·二十五、V1.5.1 每日打卡合并分组 + 高级日期筛选
 
 版本号 `versionName 1.5.1 / versionCode 25`（数据库结构不变，仍为 `version 7`）。

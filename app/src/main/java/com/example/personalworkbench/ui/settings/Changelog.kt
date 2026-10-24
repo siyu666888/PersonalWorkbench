@@ -20,6 +20,17 @@ data class ChangelogEntry(
 object Changelog {
     val entries: List<ChangelogEntry> = listOf(
         ChangelogEntry(
+            version = "1.6.3",
+            date = "2026-10-25",
+            title = "补 UI 层测试与全链路迁移测试 · 修复勾选框无障碍语义",
+            highlights = listOf(
+                "新增关键用户流 UI 测试：待办勾选写回数据库、日志填写保存落库、打卡记录渲染",
+                "新增数据库全链路迁移测试，覆盖 2→9 … 8→9 共 7 条升级路径，杜绝老用户升级崩溃",
+                "修复自定义勾选框未暴露「已勾选」语义的问题，无障碍服务现可正确读出勾选状态",
+                "测试总数由 85 增至 95"
+            )
+        ),
+        ChangelogEntry(
             version = "1.6.2",
             date = "2026-10-24",
             title = "AI 联网外发改为显式授权 · 桌面端纳入 CI",

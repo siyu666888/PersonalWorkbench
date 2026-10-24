@@ -19,7 +19,7 @@
 | 桌面端 | **独立 `:desktop` 模块**（Compose Multiplatform，19 文件 / 4,054 行） | **不依赖 `:app`，数据层各写一份** |
 | 构建 | AGP 8.x / Gradle 8.7 / JDK 17，minSdk 26 / targetSdk 34，R8 + 资源压缩 | release 实测 **3.43 MB**（V1.6.1） |
 | 测试 | Robolectric 单测 **86 例全绿**；**无 instrumentation 测试** | `app/src/androidTest` 目录不存在 |
-| 规模 | `:app` 96 个 Kotlin 文件 / **18,358 行**；11 处 TODO/FIXME | 单模块 |
+| 规模 | `:app` 96 个 Kotlin 文件 / **18,358 行**；真实 TODO/FIXME 注释 **0 处** | 单模块（注：此前记为「11 处」属误统计，见 D6） |
 
 ## 二、已完成的核心功能（V1.0 → V1.6.1，32 个版本）
 
@@ -85,7 +85,7 @@
 | **D3 日期格式化收敛** | 已在 `DateUtils.kt` 统一默认值并新增 `formatShortDate`；当前 39 处显式 pattern 调用中仅 4 处为刻意的「同年省略年份」写法，属可接受；建议建立「领域格式化入口」并写死规则：新代码不得直接传无年份 pattern | 防止再次散落（上轮已清理约 20 处） | **低** |
 | **D4 建立发布与追溯流程（部分完成）** | 每次发布：打 git tag → GitHub Release（附 APK + `mapping.txt`）→ 同步 Changelog/README/CI 版本号。**当前已完成**：V1.6.1 正式版出包 + 签名校验 + `outputs/mapping-v1.6.1.txt` 归档；**仍缺**：git tag 与 GitHub Release | 根治 C7；`mapping.txt` 归档后线上崩溃才能还原 | **低** |
 | **D5 核对 Changelog 推定日期** | 1.5.3 / 1.5.4 / 1.5.5 / 1.5.6 四条日期为按 versionCode 推定，需与实际核对 | 文档准确性 | **极低** |
-| **D6 清理 11 处 TODO/FIXME** | 逐条判定：实现 / 转 Issue / 删除 | 减少隐性债务 | **低** |
+| **~~D6 清理 TODO/FIXME~~（已作废）** | ~~逐条判定：实现 / 转 Issue / 删除~~ | **统计有误**：原记「11 处」实为 `Routes.TODO`、`ModuleType.TODO` 等「待办模块」常量的误匹配。按注释模式 `(//|\*) TODO|FIXME` 精确检索后，真实待办注释为 **0 处**，无需清理 | — |
 | **D7 密钥与产物备份** | keystore 在仓库外且不可恢复；README 已提示，建议追加离线备份清单与每次归档 `mapping.txt` | 避免「无法再更新已发布应用」 | **低** |
 | **D8 打通真机/模拟器验证（可选）** | 开启 Windows 虚拟化（Hyper-V / 内存完整性）后 x86 模拟器可用；或引入 Paparazzi 做像素级回归 | 根治 C3，可验证手势、输入法、性能 | 低（开开关）／中（Paparazzi） |
 
@@ -97,8 +97,8 @@
 | --- | --- | --- |
 | A1 修复 AI 隐私声明 | 🟩 **已完成（V1.6.2）** | 本机数据上下文默认关闭；首次联网二次确认；设置页与 README 如实描述；默认行为确为纯本地 |
 | B1 desktop 进 CI | 🟩 **已完成（V1.6.2）** | `ci.yml` 新增 `:desktop:compileKotlin`，本地实测 27s 通过 |
-| D1 Compose UI 测试 | ⬜ **未开始** | `app/src/androidTest` 不存在（第二阶段） |
-| D2 全链路迁移测试 | 🟨 **部分** | 仅覆盖 4→5 |
+| D1 Compose UI 测试 | 🟩 **已完成（V1.6.3）** | `KeyUserFlowTest` 3 例：待办勾选写库、日志保存落库、打卡记录渲染；顺带修复 `CircleCheckbox` 缺 ToggleableState 语义 |
+| D2 全链路迁移测试 | 🟩 **已完成（V1.6.3）** | `FullMigrationPathTest` 覆盖 2→9 … 8→9 共 7 条升级路径 |
 | D3 日期格式化收敛 | 🟩 **基本完成** | 默认值已含年份；剩余 4 处为刻意的同年省略写法 |
 | D4 发布与追溯流程 | 🟩 **已完成（V1.6.2）** | git tag `v1.6.2` + GitHub Release（附 APK + mapping.txt） |
 | D5 Changelog 推定日期核对 | ⬜ **待用户提供** | 1.5.3~1.5.6 仍为推定值；git 仅 13 提交、记忆无记录，需你提供真实发布日 |

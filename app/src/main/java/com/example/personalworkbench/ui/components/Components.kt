@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -415,7 +416,14 @@ fun CircleCheckbox(
                 color = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 shape = CircleShape
             )
-            .clickable(enabled = enabled, role = Role.Checkbox, onClick = { onCheckedChange(!checked) }),
+            // 用 toggleable 而非 clickable：既保留点击行为，也向外暴露
+            // ToggleableState 语义，否则无障碍服务读不出勾选状态、UI 测试也定位不到。
+            .toggleable(
+                value = checked,
+                role = Role.Checkbox,
+                enabled = enabled,
+                onValueChange = onCheckedChange
+            ),
         contentAlignment = Alignment.Center
     ) {
         if (checked) {
