@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -59,6 +60,8 @@ fun AiChatScreen(nav: NavHostController, container: AppContainer, initialQuery: 
     val messages by vm.messages.collectAsStateWithLifecycle(emptyList())
     val typing by vm.typing.collectAsStateWithLifecycle(false)
     val ctx by vm.context.collectAsStateWithLifecycle(AiAssistantViewModel.ContextState())
+    val pendingNetwork by vm.pendingNetwork.collectAsStateWithLifecycle(null)
+    val networkEndpoint by vm.networkEndpoint.collectAsStateWithLifecycle("")
     var input by remember { mutableStateOf(TextFieldValue(initialQuery)) }
     var showCtx by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
@@ -69,7 +72,7 @@ fun AiChatScreen(nav: NavHostController, container: AppContainer, initialQuery: 
     // 从首页命令栏带指令进入（文字/语音）时，自动发送首条指令
     LaunchedEffect(initialQuery) {
         if (initialQuery.isNotBlank()) {
-            vm.send(initialQuery)
+            vm.submit(initialQuery)
             input = TextFieldValue("")
         }
     }
@@ -77,6 +80,28 @@ fun AiChatScreen(nav: NavHostController, container: AppContainer, initialQuery: 
     // 新消息到达时自动滚动到底部
     LaunchedEffect(messages.size, typing) {
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
+    }
+
+    // V1.6.2：首次联网发送前的二次确认
+    if (pendingNetwork != null) {
+        AlertDialog(
+            onDismissRequest = { vm.dismissNetworkConfirm() },
+            title = { Text("确认联网调用") },
+            text = {
+                Text(
+                    "你已配置 API Key，本条提问将离开本机、发送至：\n${networkEndpoint.ifBlank { "（未设置端点）" }}\n\n" +
+                        "若在「我的 - AI 智能助手」中开启了「注入本机数据上下文」，待办/日程/笔记/目标/工程/日志的快照也会一并发送。" +
+                        "该开关默认关闭，可随时在设置里关闭。",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { vm.confirmNetworkAndSend() }) { Text("确认发送") }
+            },
+            dismissButton = {
+                TextButton(onClick = { vm.dismissNetworkConfirm() }) { Text("取消") }
+            }
+        )
     }
 
     Scaffold(
@@ -151,7 +176,7 @@ fun AiChatScreen(nav: NavHostController, container: AppContainer, initialQuery: 
                     IconButton(
                         onClick = {
                             if (input.text.isNotBlank()) {
-                                vm.send(input.text)
+                                vm.submit(input.text)
                                 input = TextFieldValue("")
                             }
                         },
@@ -237,7 +262,7 @@ fun AiChatScreen(nav: NavHostController, container: AppContainer, initialQuery: 
                             Text("快捷提问", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             vm.suggestions.forEach { s ->
                                 Surface(
-                                    onClick = { vm.send(s) },
+                                    onClick = { vm.submit(s) },
                                     shape = RoundedCornerShape(50),
                                     color = LocalSemanticColors.current.aiContainer,
                                     modifier = Modifier.fillMaxWidth()

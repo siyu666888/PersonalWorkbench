@@ -44,6 +44,7 @@ class SettingsViewModel(
     fun setAiApiKey(key: String) = viewModelScope.launch { settings.setAiApiKey(key) }
     fun setAiModel(model: String) = viewModelScope.launch { settings.setAiModel(model) }
     fun setAiLocalContext(enabled: Boolean) = viewModelScope.launch { settings.setAiLocalContext(enabled) }
+    fun setAiNetworkConfirmed(confirmed: Boolean) = viewModelScope.launch { settings.setAiNetworkConfirmed(confirmed) }
 
     fun restoreTask(id: Long) = viewModelScope.launch { taskRepo.restore(id) }
     fun permanentlyDelete(id: Long) = viewModelScope.launch { taskRepo.permanentlyDelete(id) }

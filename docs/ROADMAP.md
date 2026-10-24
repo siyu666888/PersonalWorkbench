@@ -95,14 +95,20 @@
 
 | 项 | 状态 | 说明 |
 | --- | --- | --- |
-| A1 修复 AI 隐私声明 | ⬜ **未开始** | `SettingsRepository.kt:65/:78` 仍硬编码 siliconflow 端点；README:85 仍宣称「数据不出本机」 |
-| B1 desktop 进 CI | ⬜ **未开始** | `ci.yml` 无任何 desktop 步骤 |
-| D1 Compose UI 测试 | ⬜ **未开始** | `app/src/androidTest` 不存在 |
+| A1 修复 AI 隐私声明 | 🟩 **已完成（V1.6.2）** | 本机数据上下文默认关闭；首次联网二次确认；设置页与 README 如实描述；默认行为确为纯本地 |
+| B1 desktop 进 CI | 🟩 **已完成（V1.6.2）** | `ci.yml` 新增 `:desktop:compileKotlin`，本地实测 27s 通过 |
+| D1 Compose UI 测试 | ⬜ **未开始** | `app/src/androidTest` 不存在（第二阶段） |
 | D2 全链路迁移测试 | 🟨 **部分** | 仅覆盖 4→5 |
 | D3 日期格式化收敛 | 🟩 **基本完成** | 默认值已含年份；剩余 4 处为刻意的同年省略写法 |
-| D4 发布与追溯流程 | 🟨 **部分完成** | V1.6.1 正式版 + 签名 + mapping 已归档；**无 git tag、无 GitHub Release** |
-| D5 Changelog 推定日期核对 | ⬜ **未开始** | 1.5.3~1.5.6 仍为推定值 |
-| V1.6.1 正式版交付 | 🟩 **完成** | 3,430,544 bytes；apksigner 验证 v2+v3，证书 `CN=PersonalWorkbench`；SHA-256 已记入 README |
+| D4 发布与追溯流程 | 🟩 **已完成（V1.6.2）** | git tag `v1.6.2` + GitHub Release（附 APK + mapping.txt） |
+| D5 Changelog 推定日期核对 | ⬜ **待用户提供** | 1.5.3~1.5.6 仍为推定值；git 仅 13 提交、记忆无记录，需你提供真实发布日 |
+| V1.6.1 正式版交付 | 🟩 **完成** | 3,430,544 bytes；apksigner 验证 v2+v3，证书 `CN=PersonalWorkbench` |
+| V1.6.2 正式版交付 | 🟩 **完成** | 见 README V1.6.2 章节（SHA-256 同步记入） |
+
+> **A1 的定性修正**：初版判断为「默认即外发」，实地核查 `AiAssistantViewModel.send()` 后修正——
+> 联网判定是 `config.key.isNotBlank()`，未填 Key 时确实走本地问答，**默认并未外发**。
+> 真实风险是「填 Key 后 `aiLocalContext` 默认 true，本机全板块数据被静默发出且无提示」。
+> 因此修复重点改为：**默认关闭外发开关 + 首次联网显式确认 + 文案如实描述**。
 
 ---
 

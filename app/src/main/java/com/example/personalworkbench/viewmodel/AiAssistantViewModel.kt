@@ -111,6 +111,46 @@ class AiAssistantViewModel(private val container: AppContainer) : ViewModel() {
         "进行中的工程项目有哪些？"
     )
 
+    // ===== 联网外发确认（V1.6.2）=====
+    // 配置了 API Key 即意味着提问会发往第三方端点；首次发送前弹二次确认，
+    // 让用户明确「数据将离开本机」并有机会关闭本机数据上下文。
+    private val _pendingNetwork = MutableStateFlow<String?>(null)
+    /** 待确认外发的提问文本（非 null 表示应弹出确认对话框） */
+    val pendingNetwork: StateFlow<String?> = _pendingNetwork.asStateFlow()
+
+    private val _networkEndpoint = MutableStateFlow("")
+    /** 当前将要外发到的端点地址，用于确认对话框展示 */
+    val networkEndpoint: StateFlow<String> = _networkEndpoint.asStateFlow()
+
+    /** 提交提问：若配置了 Key 且用户尚未确认过外发风险，先弹确认 */
+    fun submit(text: String) {
+        val q = text.trim()
+        if (q.isBlank()) return
+        viewModelScope.launch {
+            val key = container.settingsRepository.aiApiKey.first()
+            val confirmed = container.settingsRepository.aiNetworkConfirmed.first()
+            if (key.isNotBlank() && !confirmed) {
+                _networkEndpoint.value = container.settingsRepository.aiApiBase.first()
+                _pendingNetwork.value = q
+            } else {
+                send(q)
+            }
+        }
+    }
+
+    /** 用户确认外发：记住选择并继续发送 */
+    fun confirmNetworkAndSend() {
+        val q = _pendingNetwork.value ?: return
+        _pendingNetwork.value = null
+        viewModelScope.launch { container.settingsRepository.setAiNetworkConfirmed(true) }
+        send(q)
+    }
+
+    /** 用户取消本次联网发送 */
+    fun dismissNetworkConfirm() {
+        _pendingNetwork.value = null
+    }
+
     fun send(text: String) {
         val q = text.trim()
         if (q.isBlank()) return

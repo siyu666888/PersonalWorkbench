@@ -55,6 +55,11 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon
 
+      # 桌面端（Compose Multiplatform）与主工程完全独立、此前从未被 CI 构建，
+      # 导致 :app 改动造成的桌面端编译漂移无人知晓。此处至少保证它能编译。
+      - name: Compile desktop module (Compose Multiplatform)
+        run: ./gradlew :desktop:compileKotlin --no-daemon
+
       - name: Build & sign release APK (requires secrets)
         if: env.HAS_RELEASE_SECRETS == 'true'
         env:

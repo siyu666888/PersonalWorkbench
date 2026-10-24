@@ -82,7 +82,7 @@ app/src/main/java/com/example/personalworkbench/
 | 周/日日程视图 | ✅ | 日程页支持 月/周/日 三视图；周视图 7 日条带 + 按时段排序列表；日视图 24 小时时间轴 + 全天日程 |
 | 应用锁实校验 | ✅ | 启动与从后台返回均拦截，BiometricPrompt 指纹/设备 PIN 验证通过后才进入；无可用凭证时优雅放行 |
 | 全局搜索 | ✅ | 首页搜索入口 + 聚合检索页，跨 待办/笔记/文件/工程/目标 统一检索，结果点击直达对应详情 |
-| AI 智能助手 | ✅ | 首页 AI 入口卡片 + 对话页（路由 aiChat）；本地离线助手，按意图识别问答（今日待办/逾期/本周日程/目标/工程项目），数据不出本机 |
+| AI 智能助手 | ✅ | 首页 AI 入口卡片 + 对话页（路由 aiChat）；**默认纯本地离线问答**（今日待办/逾期/本周日程/目标/工程项目），不联网、数据不出本机 |
 
 工程管理模块（V1.5 · P1）：数据层（projects / milestones / resources / issues / daily_reports 实体 + DAO + Repository）与 UI（项目列表 + 项目详情 5 Tab + 甘特图）均已完整实现。
 
@@ -781,6 +781,30 @@ PersonalWorkbench.exe --on-top                 # 窗口置顶
 - 混淆映射已归档 `outputs/mapping-v1.6.1.txt`（每次发布需单独保留，否则线上崩溃堆栈无法还原）。
 - 日志填写页顶栏经 Robolectric 原生渲染截图实证（`docs/screenshots/08-log-fill.png`，360dp 窄屏下元素无遮挡）。
 
+## 三·三十三、V1.6.2 AI 联网改为显式授权 + 桌面端纳入 CI
+
+版本号 `versionName 1.6.2 / versionCode 33`。数据库结构不变（仍为 version 9）。
+
+### 1. AI 助手：外发需显式授权（隐私一致性修复）
+- **问题定性修正**：核查 `AiAssistantViewModel.send()` 后确认，联网判定是 `config.key.isNotBlank()` —— 未填 API Key 时确实走本地问答、不联网，**默认并未外发数据**。真实风险在于「注入本机数据上下文」开关（`aiLocalContext`）此前**默认为 true**：一旦填入 Key，待办/日程/笔记/目标/工程/日志快照会在用户无感知的情况下随提问发往第三方端点，而设置与说明文案却笼统写着「数据不出本机」。
+- `SettingsRepository` 的 `aiLocalContext` 默认值由 `true` 改为 **`false`**：配置 Key 后默认仍为云端通用问答，只有用户手动开启才会外发本机数据。
+- 新增 `aiNetworkConfirmed` 标记：配置 Key 后的**首次发送弹出二次确认对话框**，明示数据将发往的端点地址，确认后才发出并记住选择。
+- `AiAssistantViewModel` 新增 `submit()` 作为统一入口（先判定是否需要确认，再走 `send()`），聊天页 3 处发送入口（输入框、快捷提问、首页指令带入）全部改走它。
+- 设置页在已配置 Key 时以警示色显示实际端点，并说明「开启上下文才会外发」。
+
+### 2. 桌面端纳入 CI
+- `.github/workflows/ci.yml` 新增 `./gradlew :desktop:compileKotlin` 步骤。此前 `:desktop`（Compose Multiplatform，4,054 行，不依赖 `:app`）从未被 CI 构建，`:app` 改动造成的编译漂移无人知晓。本地实测编译 27 秒通过。
+
+### 3. 文档与隐私说明如实化
+- README「数据与隐私」章节补充：AI 默认不联网、外发需显式授权、上下文开关默认关闭、可随时关闭恢复纯本地。
+- 功能模块表 AI 助手描述由「数据不出本机」改为「**默认纯本地离线问答**，不联网、数据不出本机」。
+
+### 验证
+- `./gradlew :app:testDebugUnitTest` BUILD SUCCESSFUL，**85 / 85 全绿**。
+- `./gradlew :desktop:compileKotlin` BUILD SUCCESSFUL。
+- `./gradlew :app:assembleRelease` BUILD SUCCESSFUL。正式版 `outputs/PersonalWorkbench-v1.6.2-release.apk`（**3,430,544 bytes**，v2 + v3 双签名，证书 `CN=PersonalWorkbench`，SHA-256 `84b3c9d68f8dc884024d3c7428ddaf1c15c98fbe5eeb3883edef0cc0fcc58272`）。
+- 混淆映射已归档 `outputs/mapping-v1.6.2.txt`。
+
 ## 三·二十五、V1.5.1 每日打卡合并分组 + 高级日期筛选
 
 版本号 `versionName 1.5.1 / versionCode 25`（数据库结构不变，仍为 `version 7`）。
@@ -996,6 +1020,8 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ## 六、数据与隐私
 
 - 所有数据默认本地存储（Room + APP 私有目录），无账号体系、无云端依赖。
+- **AI 助手默认不联网**：未配置 API Key 时完全本地问答，任何数据都不出本机；网络请求仅在「设置-我的-AI 智能助手」填入 API Key 后才会发生。
+- **外发需显式授权**（V1.6.2）：配置 Key 后首次发送会弹出二次确认，明确告知端点地址；「注入本机数据上下文」开关**默认关闭**，只有手动打开，本机各板块数据快照才会随提问发往你所填的第三方端点。可在设置页随时关闭以恢复纯本地问答。
 - 已关闭系统自动云备份（`backup_rules.xml` / `data_extraction_rules.xml`）。
 - 崩溃日志**只写本机**（`filesDir/crash/`，最多 10 份），不上传、不含任何账号信息；可在「我的-崩溃日志」查看、分享或清空，也可在设置页关闭。
 - 卸载 APP 会丢失 APP 私有目录内的文件，请通过「我的-导出备份」定期备份。

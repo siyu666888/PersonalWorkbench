@@ -20,6 +20,18 @@ data class ChangelogEntry(
 object Changelog {
     val entries: List<ChangelogEntry> = listOf(
         ChangelogEntry(
+            version = "1.6.2",
+            date = "2026-10-24",
+            title = "AI 联网外发改为显式授权 · 桌面端纳入 CI",
+            highlights = listOf(
+                "AI 助手默认纯本地问答：未配置 API Key 时任何数据都不出本机",
+                "「注入本机数据上下文」开关默认关闭——只有你手动开启，待办/日程/笔记/目标/工程/日志快照才会随提问发往第三方端点",
+                "配置 API Key 后首次发送会弹出二次确认，明确告知数据将发往的端点地址",
+                "设置页与说明文案如实描述联网行为，不再笼统宣称「数据不出本机」",
+                "桌面端（Compose Multiplatform）首次纳入 CI 编译，防止与主工程漂移"
+            )
+        ),
+        ChangelogEntry(
             version = "1.6.1",
             date = "2026-10-19",
             title = "日期补年份 · 打卡排序修正 · 日志页顶栏重排 · 更新记录补全",

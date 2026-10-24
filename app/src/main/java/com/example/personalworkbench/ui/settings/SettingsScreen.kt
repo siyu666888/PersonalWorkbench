@@ -82,7 +82,7 @@ fun SettingsScreen(nav: NavHostController, container: AppContainer) {
     val aiApiBase by vm.aiApiBase.collectAsStateWithLifecycle("https://api.siliconflow.cn/v1")
     val aiApiKey by vm.aiApiKey.collectAsStateWithLifecycle("")
     val aiModel by vm.aiModel.collectAsStateWithLifecycle("Qwen/Qwen2.5-7B-Instruct")
-    val aiLocalContext by vm.aiLocalContext.collectAsStateWithLifecycle(true)
+    val aiLocalContext by vm.aiLocalContext.collectAsStateWithLifecycle(false)
 
     var showCrashLogs by remember { mutableStateOf(false) }
     var showChangelog by remember { mutableStateOf(false) }
@@ -233,8 +233,19 @@ fun SettingsScreen(nav: NavHostController, container: AppContainer) {
                         "把待办/日程/笔记/目标/工程/日志等本机数据随提问发给模型，回答才有据可依",
                         aiLocalContext
                     ) { vm.setAiLocalContext(it) }
+                    // V1.6.2：明确外发去向，避免用户误以为「数据不出本机」
+                    if (aiApiKey.isNotBlank()) {
+                        Text(
+                            "已配置 API Key：提问内容将发送至下方端点。开启「注入本机数据上下文」时，" +
+                                "本机各板块数据快照也会一并外发。端点：${aiApiBase.ifBlank { "未设置" }}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = 6.dp)
+                        )
+                    }
                     Text(
-                        "接入 OpenAI 兼容接口（默认硅基流动）后，AI 助手将使用云端免费大模型回答；未填 Key 时回退到本地问答。",
+                        "接入 OpenAI 兼容接口后，AI 助手将使用云端大模型回答；未填 Key 时纯本地问答、不联网。" +
+                            "本机数据上下文默认关闭，需你手动开启才会外发。",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 8.dp)

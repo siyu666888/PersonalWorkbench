@@ -41,6 +41,8 @@ class SettingsRepository(
         private val AI_API_KEY = stringPreferencesKey("ai_api_key")
         private val AI_MODEL = stringPreferencesKey("ai_model")
         private val AI_LOCAL_CONTEXT = booleanPreferencesKey("ai_local_context")
+        /** 用户是否已确认过「联网调用会把本机数据发往第三方端点」（V1.6.2，默认未确认） */
+        private val AI_NETWORK_CONFIRMED = booleanPreferencesKey("ai_network_confirmed")
     }
 
     val themeMode: Flow<ThemeMode> = dataStore.data.map { p ->
@@ -68,8 +70,17 @@ class SettingsRepository(
     /** AI 助手：模型名（默认硅基流动免费模型 Qwen2.5-7B-Instruct） */
     val aiModel: Flow<String> = dataStore.data.map { p -> p[AI_MODEL] ?: "Qwen/Qwen2.5-7B-Instruct" }
 
-    /** AI 助手：是否把本机各板块数据作为上下文发给云端模型（V1.4.1，默认开启） */
-    val aiLocalContext: Flow<Boolean> = dataStore.data.map { p -> p[AI_LOCAL_CONTEXT] ?: true }
+    /**
+     * AI 助手：是否把本机各板块数据作为上下文发给云端模型（V1.4.1）。
+     *
+     * V1.6.2 起**默认关闭**：配置 API Key 后应用默认仍为纯云端通用问答，
+     * 只有用户显式打开本开关，本机待办/日程/笔记/目标/工程/日志快照才会随提问外发。
+     * 这样「数据不出本机」的默认承诺才与实现一致。
+     */
+    val aiLocalContext: Flow<Boolean> = dataStore.data.map { p -> p[AI_LOCAL_CONTEXT] ?: false }
+
+    /** AI 助手：用户是否已确认过联网调用的外发风险（V1.6.2，默认 false） */
+    val aiNetworkConfirmed: Flow<Boolean> = dataStore.data.map { p -> p[AI_NETWORK_CONFIRMED] ?: false }
 
     /** AI 助手：合并配置，便于一次性读取 */
     data class AiConfig(val base: String, val key: String, val model: String)
@@ -93,6 +104,7 @@ class SettingsRepository(
     suspend fun setAiApiKey(key: String) = dataStore.edit { it[AI_API_KEY] = key }
     suspend fun setAiModel(model: String) = dataStore.edit { it[AI_MODEL] = model }
     suspend fun setAiLocalContext(enabled: Boolean) = dataStore.edit { it[AI_LOCAL_CONTEXT] = enabled }
+    suspend fun setAiNetworkConfirmed(confirmed: Boolean) = dataStore.edit { it[AI_NETWORK_CONFIRMED] = confirmed }
 
     /** 启动计数 +1，返回最新值 (用于第 3 次提醒, PRD 7.1) */
     suspend fun incrementLaunchCount(): Int {
