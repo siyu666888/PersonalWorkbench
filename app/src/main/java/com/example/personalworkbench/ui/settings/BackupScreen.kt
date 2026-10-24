@@ -1,6 +1,7 @@
 package com.example.personalworkbench.ui.settings
 
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -54,6 +55,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.personalworkbench.di.AppContainer
 import com.example.personalworkbench.util.BackupManager
+import com.example.personalworkbench.util.DataExporter
 import com.example.personalworkbench.util.formatDate
 import com.example.personalworkbench.viewmodel.BackupViewModel
 
@@ -108,6 +110,39 @@ fun BackupScreen(nav: NavHostController, container: AppContainer) {
             vm.restoreFromUri(uri) { ok, err ->
                 Toast.makeText(context, if (ok) "恢复成功" else "恢复失败: $err", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    // ---- 数据导出（V1.6.4 / A4）：Markdown 给人读，CSV 给表格软件用 ----
+    // CreateDocument 的 MIME 在注册时就固定，故按格式准备两个 launcher；
+    // 当前想导出的模块记在 pendingKind 里，回调时才知道这次生成哪个内容。
+    var exportFormat by remember { mutableStateOf(DataExporter.Format.MARKDOWN) }
+    var pendingKind by remember { mutableStateOf<DataExporter.Kind?>(null) }
+
+    fun doExport(uri: Uri) {
+        val kind = pendingKind ?: return
+        vm.exportData(uri, kind, exportFormat) { ok, err ->
+            Toast.makeText(
+                context,
+                if (ok) "已导出 ${kind.label}（${exportFormat.ext.uppercase()}）" else "导出失败: $err",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+    val mdLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/markdown")) { uri ->
+        if (uri != null) doExport(uri)
+    }
+    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        if (uri != null) doExport(uri)
+    }
+
+    /** 点击导出项：按当前选中的格式与建议文件名唤起系统「保存到…」 */
+    fun launchExport(kind: DataExporter.Kind) {
+        pendingKind = kind
+        val name = DataExporter.suggestedFileName(kind, exportFormat)
+        when (exportFormat) {
+            DataExporter.Format.MARKDOWN -> mdLauncher.launch(name)
+            DataExporter.Format.CSV -> csvLauncher.launch(name)
         }
     }
 
@@ -180,6 +215,51 @@ fun BackupScreen(nav: NavHostController, container: AppContainer) {
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
+                }
+            }
+
+            // 数据导出（V1.6.4 / A4）：把数据带走而不必依赖本应用的 JSON 快照
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Share, null)
+                        Text("数据导出", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 12.dp))
+                    }
+                    // 格式二选一：一行 filter chip，选中的高亮
+                    Row(
+                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        DataExporter.Format.values().forEach { fmt ->
+                            ExportFormatChip(
+                                label = when (fmt) {
+                                    DataExporter.Format.MARKDOWN -> "Markdown（给人读）"
+                                    DataExporter.Format.CSV -> "CSV（Excel/WPS）"
+                                },
+                                selected = exportFormat == fmt,
+                                onClick = { exportFormat = fmt }
+                            )
+                        }
+                    }
+                    DataExporter.Kind.values().forEach { kind ->
+                        BackupNavRow(
+                            Icons.Outlined.DataObject,
+                            kind.label,
+                            when (kind) {
+                                DataExporter.Kind.NOTES -> "标题/标签/正文/时间"
+                                DataExporter.Kind.WORK_LOGS -> "按日期由近及远的日志正文"
+                                DataExporter.Kind.TASKS -> "含子任务的全部在库待办"
+                                DataExporter.Kind.GOALS -> "目标进度 + 每条打卡流水"
+                                DataExporter.Kind.ALL -> "上述四类拼成一个文件"
+                            }
+                        ) { launchExport(kind) }
+                    }
+                    Text(
+                        "导出文件不含图片本身；CSV 默认带 UTF-8 BOM，Excel / WPS 直接打开不乱码。",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
 
@@ -312,6 +392,29 @@ private fun BackupSwitchRow(
             Text(subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Switch(checked = checked, onCheckedChange = onChange)
+    }
+}
+
+/** 导出格式 chip：选中用主色容器填充，未选中只描边 */
+@Composable
+private fun ExportFormatChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val bg = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+    val fg = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = bg,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+        ),
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = fg,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
     }
 }
 

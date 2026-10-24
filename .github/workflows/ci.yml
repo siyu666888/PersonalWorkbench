@@ -78,6 +78,12 @@ jobs:
           ./gradlew assembleRelease --no-daemon
           $ANDROID_HOME/build-tools/34.0.0/apksigner verify app/build/outputs/apk/release/*.apk
 
+      # Baseline Profile 属于「丢了也不报错」的东西：R8 规则调整、依赖升级、sourceSet 改名
+      # 都可能让它静默消失，包照样能装但性能收益归零。这里显式断言一次。
+      - name: Verify baseline profile packaged
+        if: env.HAS_RELEASE_SECRETS == 'true'
+        run: unzip -l app/build/outputs/apk/release/*.apk | grep -q "assets/dexopt/baseline.prof"
+
       - name: Upload APK artifacts
         if: always()
         uses: actions/upload-artifact@v4

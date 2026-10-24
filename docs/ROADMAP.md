@@ -1,6 +1,6 @@
-# PersonalWorkbench 后续开发可行性建议（V1.6.1 正式版基线）
+# PersonalWorkbench 后续开发可行性建议（V1.6.4 正式版基线）
 
-> 本文基于对当前代码库的实地核查生成，**2026-10-24 更新**（初版 2026-10-20）。
+> 本文基于对当前代码库的实地核查生成，**2026-10-25 更新**（初版 2026-10-20，随每次发布刷新）。
 > 所有结论均指向具体文件与行号，不做泛泛而谈。
 > 成本口径：**低 = ≤0.5 人日 / 中 = 1–3 人日 / 高 = >3 人日**。
 
@@ -17,8 +17,9 @@
 | 导航 | Navigation Compose | 5 个顶层 Tab（首页/待办/笔记/日程/我的） |
 | 提醒 | WorkManager（一次性 + 每日周期）+ 本地通知 | 不依赖精确闹钟权限 |
 | 桌面端 | **独立 `:desktop` 模块**（Compose Multiplatform，19 文件 / 4,054 行） | **不依赖 `:app`，数据层各写一份** |
-| 构建 | AGP 8.x / Gradle 8.7 / JDK 17，minSdk 26 / targetSdk 34，R8 + 资源压缩 | release 实测 **3.43 MB**（V1.6.1） |
-| 测试 | Robolectric 单测 **86 例全绿**；**无 instrumentation 测试** | `app/src/androidTest` 目录不存在 |
+| 构建 | AGP 8.4 / Gradle 8.7 / JDK 17，minSdk 26 / targetSdk 34，R8 + 资源压缩；**配置缓存 + 构建缓存已启用**，增量构建 24–28s → 15s | release 实测 **3.43 MB**（V1.6.3） |
+| Baseline Profile | **已有**：手写 75 条 HRF 规则覆盖冷启动 + 首次 Composition；release 内含 `baseline.prof` / `baseline.profm` | `app/src/main/baselineProfiles/baseline-prof.txt`，由 AGP `compileReleaseArtProfile` 编译 |
+| 测试 | Robolectric + JVM 单测 **107 例全绿**（含 4 例 Compose UI 用户流、7 例全链路迁移、11 例导出渲染）；**无 instrumentation 测试** | `app/src/androidTest` 目录不存在 |
 | 规模 | `:app` 96 个 Kotlin 文件 / **18,358 行**；真实 TODO/FIXME 注释 **0 处** | 单模块（注：此前记为「11 处」属误统计，见 D6） |
 
 ## 二、已完成的核心功能（V1.0 → V1.6.1，32 个版本）
@@ -96,14 +97,19 @@
 | 项 | 状态 | 说明 |
 | --- | --- | --- |
 | A1 修复 AI 隐私声明 | 🟩 **已完成（V1.6.2）** | 本机数据上下文默认关闭；首次联网二次确认；设置页与 README 如实描述；默认行为确为纯本地 |
+| A4 导出 Markdown / CSV | 🟩 **已完成（V1.6.4）** | `util/DataExporter`（零 Android 依赖，可纯 JVM 测）+ `BackupViewModel.exportData` + 备份页「数据导出」卡片；Markdown/CSV 两种格式，5 类模块；CSV 带 BOM 且 RFC4180 转义；`DataExporterTest` 11 例 |
 | B1 desktop 进 CI | 🟩 **已完成（V1.6.2）** | `ci.yml` 新增 `:desktop:compileKotlin`，本地实测 27s 通过 |
 | D1 Compose UI 测试 | 🟩 **已完成（V1.6.3）** | `KeyUserFlowTest` 3 例：待办勾选写库、日志保存落库、打卡记录渲染；顺带修复 `CircleCheckbox` 缺 ToggleableState 语义 |
 | D2 全链路迁移测试 | 🟩 **已完成（V1.6.3）** | `FullMigrationPathTest` 覆盖 2→9 … 8→9 共 7 条升级路径 |
 | D3 日期格式化收敛 | 🟩 **基本完成** | 默认值已含年份；剩余 4 处为刻意的同年省略写法 |
 | D4 发布与追溯流程 | 🟩 **已完成（V1.6.2）** | git tag `v1.6.2` + GitHub Release（附 APK + mapping.txt） |
 | D5 Changelog 推定日期核对 | ⬜ **待用户提供** | 1.5.3~1.5.6 仍为推定值；git 仅 13 提交、记忆无记录，需你提供真实发布日 |
+| C1 Baseline Profile | 🟩 **已完成（V1.6.4）** | 手写 HRF（`src/main/baselineProfiles/baseline-prof.txt`，75 条规则全部经 dexdump 类名比对）；release APK 内含 `baseline.prof` + `baseline.profm`，profileinstaller 经 androidx.startup 自动安装。**注**：这是无真机条件下的折中，拿到设备后建议改用 Macrobenchmark 实测生成再对比 |
+| C2 构建提速（配置级） | 🟩 **已完成（V1.6.4）** | `gradle.properties` 启用配置缓存 + 构建缓存 + vfs.watch + 堆调整；同名 `assembleDebug` 由 24–28s 降至 15s |
 | V1.6.1 正式版交付 | 🟩 **完成** | 3,430,544 bytes；apksigner 验证 v2+v3，证书 `CN=PersonalWorkbench` |
 | V1.6.2 正式版交付 | 🟩 **完成** | 见 README V1.6.2 章节（SHA-256 同步记入） |
+| V1.6.3 正式版交付 | 🟩 **完成** | 3,430,540 bytes；测试 95 → 106（V1.6.4 又 +11） |
+| V1.6.4 正式版交付 | 🟩 **完成** | 见 README V1.6.4 章节（A4/C1/C2 三项齐活） |
 
 > **A1 的定性修正**：初版判断为「默认即外发」，实地核查 `AiAssistantViewModel.send()` 后修正——
 > 联网判定是 `config.key.isNotBlank()`，未填 Key 时确实走本地问答，**默认并未外发**。

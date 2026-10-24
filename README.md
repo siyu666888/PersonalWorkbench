@@ -829,6 +829,43 @@ PersonalWorkbench.exe --on-top                 # 窗口置顶
 - `./gradlew :app:assembleRelease` BUILD SUCCESSFUL。正式版 `outputs/PersonalWorkbench-v1.6.3-release.apk`（**3,430,540 bytes**，v2 + v3 双签名，证书 `CN=PersonalWorkbench`，SHA-256 `4ca1c1920c392f273b9bbf3e2238eb9d769f173cfcc513bbeae48a4fb777af90`）。
 - 混淆映射已归档 `outputs/mapping-v1.6.3.txt`。
 
+## 三·三十五、V1.6.4 数据导出 Markdown/CSV + Baseline Profile + 构建提速
+
+版本号 `versionName 1.6.4 / versionCode 35`。数据库结构不变（仍为 version 9）。本轮对应 ROADMAP 第三阶段（体验与性能）的 A4 / C1 / C2 三项。
+
+### 1. 数据导出：笔记 / 工作日志 / 待办 / 目标打卡 → Markdown 或 CSV（ROADMAP A4）
+此前数据只能以**本应用私有的 JSON 快照**导出，离开了本应用就打不开。这一版在「我的 → 备份与恢复」页新增**数据导出**卡片：
+
+- **格式二选一**：`Markdown（给人读）` / `CSV（Excel / WPS）`，格式 chip 选中即在右上⻆ pipeline 生效，随后点模块行唤起系统「保存到…」。
+- **模块**：笔记、工作日志、待办、目标与打卡、以及「全部数据」（四类拼成一个文件）。文件名形如 `workbench-notes-20261025-0930.csv`。
+- **CSV 转义与 BOM**（两个不做就会毁数据的细节）：
+  - 含逗号 / 引号 / 换行的正文按 RFC 4180 用双引号包裹、内部引号翻倍；
+  - 文件头写入 UTF-8 BOM——Windows 中文环境下的 Excel / WPS 默认按 GBK 解析无 BOM 的 UTF-8，不加必乱码。
+- **目标与打卡导出为扁平连表**：每行一条打卡，前面冗余目标列；**没有打卡过的目标也占一行**（记录列留空），避免导出后「这个目标凭空消失」。
+- 待办导出只含在库任务（回收站 `DELETED` 已排除），Markdown 版用 `- [ ] / - [x]` 复选框区分状态。
+
+渲染逻辑集中在 `util/DataExporter.kt`，**刻意零 Android 依赖**（不碰 Context / ContentResolver），因此可以跑纯 JVM 单测；落盘与读库在 `BackupViewModel.exportData()`。新增 `DataExporterTest` **11 例**，其中包含一个独立实现的 RFC 4180 解析器——用「别人家表格软件」的视角校验导出文件，而不是复用被测代码。
+
+### 2. Baseline Profile（ROADMAP C1）
+- 手写 ART Profiler 规则：`app/src/main/baselineProfiles/baseline-prof.txt`，覆盖**冷启动 + 首次 Composition**路径的应用类（App / Room 建表 / 各 Tab 首屏 Composable 宿主 `*Kt` / 常用 ViewModel 与工具类）与 Compose 运行时热点（`ComposerImpl`、`SlotTable`、`SlotWriter`、`AndroidComposeView`、`LayoutNode`、`LazyItemScopeImpl` 等）。
+- **规则来源可核验**：先用 `dexdump` 导出 debug APK 全部 dex 的类名清单，`DataExporter` 之外的每条规则都逐一比对过——现共 **75 条，0 条找不到对应类**。文件头注释写明了复现方法与维护约定（后续换用 Macrobenchmark 实测生成时以本文件作兜底）。
+- AGP 会自动完成后续环节，构建日志可见链路：`mergeReleaseArtProfile` → `expandReleaseArtProfileWildcards` → `minifyReleaseWithR8` → `compileReleaseArtProfile` → `packageRelease`。release APK 内含 `assets/dexopt/baseline.prof`（5,950 bytes）与 `baseline.profm`（800 bytes，多 dex 映射），`androidx.profileinstaller` 的 initializer 已由 androidx.startup 自动注册，首次启动即安装 Profile。
+
+### 3. 构建提速（ROADMAP C2）
+`gradle.properties` 补齐四项配置级提速，**不改任何代码**：配置缓存、构建缓存、文件监听、以及更合理的堆配置（Gradle 3 GB / Kotlin daemon 2 GB，16 GB 机实测稳定）。
+
+| 场景（同一 machine，`assembleDebug` up-to-date） | 优化前 | 优化后 |
+| --- | --- | --- |
+| 增量构建总耗时 | 24–28 s | **15 s** |
+
+> 配置缓存在 AGP 8.4 + Kotlin 1.9.24(kapt) 下实测无兼容告警，`testDebugUnitTest`、`:desktop:compileKotlin` 同样验证通过。若日后新增插件不兼容，可用 `--configuration-cache-problems=fail` 精确定位。
+
+### 验证
+- `./gradlew :app:testDebugUnitTest` BUILD SUCCESSFUL，测试总数 **107 / 107 全绿**（新增 11 个导出渲染用例 + 1 个导出入口 UI 用例）。
+- `./gradlew :app:assembleRelease` BUILD SUCCESSFUL；正式版 `PersonalWorkbench-1.6.4-release.apk`（**3,446,928 bytes**，v2 + v3 双签名，证书 `CN=PersonalWorkbench`，SHA-256 `f6808f794d6675b36a9a81ba72242a4844d3228ee1e3d717f4c0c19a57d5a542`）。
+- `unzip -l` 确认 release APK 内含 `assets/dexopt/baseline.prof` 与 `baseline.profm`。
+- 混淆映射已归档 `outputs/mapping-v1.6.4.txt`。
+
 ## 三·二十五、V1.5.1 每日打卡合并分组 + 高级日期筛选
 
 版本号 `versionName 1.5.1 / versionCode 25`（数据库结构不变，仍为 `version 7`）。

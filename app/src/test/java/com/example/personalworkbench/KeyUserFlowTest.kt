@@ -24,6 +24,7 @@ import com.example.personalworkbench.data.local.entities.TaskEntity
 import com.example.personalworkbench.data.local.entities.TaskStatus
 import com.example.personalworkbench.di.AppContainer
 import com.example.personalworkbench.ui.LocalWindowSizeClass
+import com.example.personalworkbench.ui.settings.BackupScreen
 import com.example.personalworkbench.ui.goals.GoalDetailScreen
 import com.example.personalworkbench.ui.logs.LogFillScreen
 import com.example.personalworkbench.ui.theme.PersonalWorkbenchTheme
@@ -194,6 +195,27 @@ class KeyUserFlowTest {
             3, setOf(t0830, t1300, t1800).size
         )
         assertTrue("时间文本必须含年份", t0830.contains("年"))
+    }
+
+    // ===== 4. 备份页：数据导出入口（V1.6.4 / A4）=====
+
+    @Test
+    fun backupScreen_rendersDataExportSection() {
+        setScreen { BackupScreen(nav = rememberNavController(), container = container) }
+
+        // 卡片标题与两种格式 chip
+        composeRule.onNodeWithText("数据导出").assertExists()
+        composeRule.onNodeWithText("Markdown（给人读）").assertExists()
+        composeRule.onNodeWithText("CSV（Excel/WPS）").assertExists()
+
+        // 五个可导出的模块行都必须渲染出来（少一个就等于功能缺失）
+        listOf("笔记", "工作日志", "待办", "目标与打卡", "全部数据").forEach { label ->
+            composeRule.onNodeWithText(label).assertExists()
+        }
+
+        // 已有能力不能被这轮改动挤掉：手动备份 / 恢复入口仍在
+        composeRule.onNodeWithText("导出备份").assertExists()
+        composeRule.onNodeWithText("从文件恢复").assertExists()
     }
 
     private fun hour(h: Int) = h * 3_600_000L

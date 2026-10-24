@@ -1,0 +1,116 @@
+# 手写 Baseline Profile 规则（HRF 格式）——V1.6.4 / C1
+#
+# 为什么是手写：生成 Baseline Profile 需要真机或 Gradle Managed Device
+# （Macrobenchmark + androidx.benchmark 插件），本机无 hypervisor，模拟器无法引导，
+# 因此采用折中方案：用 ART 可读的 HRF 规则覆盖「冷启动 + 首次 Composition」路径。
+# AGP 会把本文件编译进 APK 的 assets/dexopt/baseline.prof，安装时随包下发，
+# dex2oat 直接预编译这些类/方法，减少 JIT 解释执行与后台编译开销。
+#
+# 规则来源（非拍脑袋）：先用 build-tools 的 dexdump 导出 debug APK 全部 dex 的类名清单，
+#     Class descriptor 列表 → 排序去重 → 本文件每条规则均在其中存在
+# 维护约定：
+#   1. 只写「类级规则」（L全限定名;），不写方法签名——方法签名极易随依赖升级失效；
+#   2. 新增类必须是**确认真存在**的（跑一次上面的 dexdump 比对），不要凭印象；
+#   3. TODO：具备真机/模拟器条件后，改用 Macrobenchmark 实测生成 + 本文件作兜底，
+#      Gradle Managed Device 方案见 docs/ROADMAP.md C1。
+#   4. 启用 R8 后（release）AGP 会按 mapping 自动重写这些规则为混淆后名字，
+#      因此这里写的是**源码名**，不要手抄 mapping.txt。
+#
+# ---------------------------------------------------------------------------
+# 一、应用自身：冷启动即执行的代码
+# ---------------------------------------------------------------------------
+Lcom/example/personalworkbench/PersonalWorkbenchApp;
+Lcom/example/personalworkbench/MainActivity;
+Lcom/example/personalworkbench/MainActivityKt;
+Lcom/example/personalworkbench/di/AppContainer;
+Lcom/example/personalworkbench/di/AppContainerKt;
+Lcom/example/personalworkbench/crash/CrashReporter;
+Lcom/example/personalworkbench/crash/CrashLogStore;
+
+# Room 数据库启动链（AppDatabase_Impl / DAO_Impl 为 kapt 生成类，真实存在）
+Lcom/example/personalworkbench/data/local/AppDatabase;
+Lcom/example/personalworkbench/data/local/AppDatabase_Impl;
+Lcom/example/personalworkbench/data/local/Converters;
+Lcom/example/personalworkbench/data/local/Migrations;
+Lcom/example/personalworkbench/data/local/dao/TaskDao_Impl;
+Lcom/example/personalworkbench/data/local/dao/ScheduleDao_Impl;
+Lcom/example/personalworkbench/data/local/dao/NoteDao_Impl;
+Lcom/example/personalworkbench/data/local/dao/GoalDao_Impl;
+Lcom/example/personalworkbench/data/local/dao/WorkLogDao_Impl;
+Lcom/example/personalworkbench/data/local/dao/FileDao_Impl;
+Lcom/example/personalworkbench/data/local/dao/EngineeringDao_Impl;
+Lcom/example/personalworkbench/data/local/dao/TagDao_Impl;
+
+# 首屏依赖的设置/仓储
+Lcom/example/personalworkbench/data/preferences/SettingsRepository;
+Lcom/example/personalworkbench/data/repository/TaskRepository;
+Lcom/example/personalworkbench/data/repository/ScheduleRepository;
+Lcom/example/personalworkbench/data/repository/NoteRepository;
+Lcom/example/personalworkbench/data/repository/GoalRepository;
+Lcom/example/personalworkbench/data/repository/WorkLogRepository;
+
+# 首屏 / Tab 切换立即渲染的 Composable 宿主类（Kotlin 顶层函数 → *Kt）
+Lcom/example/personalworkbench/ui/home/HomeScreenKt;
+Lcom/example/personalworkbench/ui/todo/TodoScreenKt;
+Lcom/example/personalworkbench/ui/calendar/CalendarScreenKt;
+Lcom/example/personalworkbench/ui/notes/NotesScreenKt;
+Lcom/example/personalworkbench/ui/goals/GoalsScreenKt;
+Lcom/example/personalworkbench/ui/reports/ReportsScreenKt;
+Lcom/example/personalworkbench/ui/settings/SettingsScreenKt;
+Lcom/example/personalworkbench/ui/components/ComponentsKt;
+Lcom/example/personalworkbench/ui/navigation/Routes;
+Lcom/example/personalworkbench/ui/navigation/TopLevelRoute;
+Lcom/example/personalworkbench/ui/theme/ThemeKt;
+Lcom/example/personalworkbench/ui/security/AppLockGateKt;
+
+# 首屏/列表每次都要跑的工具与 ViewModel
+Lcom/example/personalworkbench/util/DateUtilsKt;
+Lcom/example/personalworkbench/util/RecurrenceUtilsKt;
+Lcom/example/personalworkbench/util/MarkdownUtilKt;
+Lcom/example/personalworkbench/viewmodel/MainViewModel;
+Lcom/example/personalworkbench/viewmodel/HomeViewModel;
+Lcom/example/personalworkbench/viewmodel/TodoViewModel;
+Lcom/example/personalworkbench/viewmodel/CalendarViewModel;
+
+# ---------------------------------------------------------------------------
+# 二、Compose 运行时热点（Compose 应用冷启动开销的大头）
+# ---------------------------------------------------------------------------
+Landroidx/compose/runtime/ComposerImpl;
+Landroidx/compose/runtime/CompositionImpl;
+Landroidx/compose/runtime/RecomposeScopeImpl;
+Landroidx/compose/runtime/SlotTable;
+Landroidx/compose/runtime/SlotWriter;
+Landroidx/compose/runtime/SlotReader;
+Landroidx/compose/runtime/changelist/ChangeList;
+Landroidx/compose/runtime/changelist/FixupList;
+Landroidx/compose/runtime/collection/IdentityArraySet;
+Landroidx/compose/runtime/snapshots/Snapshot;
+Landroidx/compose/runtime/saveable/RememberSaveableKt;
+
+# ---------------------------------------------------------------------------
+# 三、UI 布局 / 绘制 / 滚动（列表滚动帧稳定性）
+# ---------------------------------------------------------------------------
+Landroidx/compose/ui/platform/AndroidComposeView;
+Landroidx/compose/ui/node/LayoutNode;
+Landroidx/compose/ui/node/NodeChain;
+Landroidx/compose/ui/node/MeasureAndLayoutDelegate;
+Landroidx/compose/ui/graphics/drawscope/CanvasDrawScope;
+Landroidx/compose/ui/graphics/AndroidCanvas_androidKt;
+Landroidx/compose/ui/draw/DrawModifierKt;
+Landroidx/compose/foundation/lazy/LazyDslKt;
+Landroidx/compose/foundation/lazy/LazyItemScopeImpl;
+Landroidx/compose/foundation/lazy/layout/LazyLayoutItemContentFactoryKt;
+Landroidx/compose/foundation/layout/PaddingKt;
+Landroidx/compose/foundation/ScrollKt;
+Landroidx/compose/foundation/ClickableKt;
+Landroidx/compose/animation/core/AnimationKt;
+Landroidx/compose/material3/ScaffoldKt;
+Landroidx/compose/material3/AppBarKt;
+Landroidx/compose/material3/TextKt;
+Landroidx/compose/material3/CardKt;
+
+# ---------------------------------------------------------------------------
+# 四、Room 运行时（首屏要开库 + 跑迁移检查）
+# ---------------------------------------------------------------------------
+Landroidx/room/RoomDatabase;
+Landroidx/room/SharedSQLiteStatement;

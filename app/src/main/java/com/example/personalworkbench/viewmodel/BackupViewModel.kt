@@ -6,14 +6,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.personalworkbench.data.local.AppDatabase
+import com.example.personalworkbench.data.local.entities.GoalEntity
 import com.example.personalworkbench.data.preferences.SettingsRepository
 import com.example.personalworkbench.di.AppContainer
 import com.example.personalworkbench.util.BackupManager
+import com.example.personalworkbench.util.DataExporter
 import com.example.personalworkbench.util.dayStartMillis
 import com.example.personalworkbench.util.formatFileSize
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -120,6 +124,49 @@ class BackupViewModel(
         val res = runCatching {
             withContext(Dispatchers.IO) {
                 BackupManager.export(context, database.openHelper.writableDatabase, uri).getOrThrow()
+            }
+        }
+        _busy.value = false
+        onResult(res.isSuccess, res.exceptionOrNull()?.message)
+    }
+
+    /**
+     * 导出为 Markdown / CSV（V1.6.4 / A4）：把本机数据渲染成通用可读格式，
+     * 让用户不必依赖本应用的 JSON 快照也能把数据带走 / 贴进别的软件。
+     *
+     * 注意：这里用 `dao.observeXxx().first()` 做**一次性读取**（Room 的 Flow 首发射即为当前快照），
+     * 不额外新增 suspend 查询方法，避免 DAO 接口膨胀；
+     * 目标打卡跨目标一次性取全部流水，交给 [DataExporter] 按 goal_id 归组。
+     */
+    fun exportData(
+        uri: Uri,
+        kind: DataExporter.Kind,
+        format: DataExporter.Format,
+        onResult: (Boolean, String?) -> Unit
+    ) = viewModelScope.launch {
+        _busy.value = true
+        val res = runCatching {
+            withContext(Dispatchers.IO) {
+                val want = { target: DataExporter.Kind -> kind == target || kind == DataExporter.Kind.ALL }
+
+                val goals: List<GoalEntity> = if (want(DataExporter.Kind.GOALS)) {
+                    database.goalDao().observeActive().first() + database.goalDao().observeCompleted().first()
+                } else emptyList()
+
+                val data = DataExporter.Data(
+                    notes = if (want(DataExporter.Kind.NOTES)) database.noteDao().observeAll().first() else emptyList(),
+                    logs = if (want(DataExporter.Kind.WORK_LOGS)) database.workLogDao().observeAll().first() else emptyList(),
+                    // observeAll 已排除回收站(status=DELETED)，导出的都是「还活着」的待办
+                    tasks = if (want(DataExporter.Kind.TASKS)) database.taskDao().observeAll().first() else emptyList(),
+                    goals = goals,
+                    records = goals.flatMap { database.goalDao().getRecords(it.id) }
+                )
+
+                val content = DataExporter.render(data, kind, format)
+                context.contentResolver.openOutputStream(uri)?.use { os ->
+                    os.write(DataExporter.bytesFor(content, format))
+                } ?: error("无法写入所选位置")
+                content.length
             }
         }
         _busy.value = false

@@ -20,6 +20,18 @@ data class ChangelogEntry(
 object Changelog {
     val entries: List<ChangelogEntry> = listOf(
         ChangelogEntry(
+            version = "1.6.4",
+            date = "2026-10-25",
+            title = "数据导出 Markdown/CSV · Baseline Profile · 构建提速",
+            highlights = listOf(
+                "新增数据导出：笔记 / 工作日志 / 待办 / 目标打卡 / 全部数据，可导出 Markdown 或 CSV 到本地任意位置",
+                "CSV 带 UTF-8 BOM 且单元格转义，Excel / WPS 直接打开不乱码、正文里的逗号不会串行",
+                "接入 Baseline Profile（手写启动路径规则），冷启动与列表滚动的即时编译开销下降",
+                "构建提速：启用配置缓存 + 构建缓存，日常增量构建由约 26 秒降到 15 秒",
+                "新增数据导出渲染测试 11 例 + 导出入口 UI 测试 1 例，测试总数增至 107"
+            )
+        ),
+        ChangelogEntry(
             version = "1.6.3",
             date = "2026-10-25",
             title = "补 UI 层测试与全链路迁移测试 · 修复勾选框无障碍语义",
