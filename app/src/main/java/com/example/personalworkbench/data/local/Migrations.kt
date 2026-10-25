@@ -96,9 +96,22 @@ object Migrations {
         }
     }
 
+    // 版本 9 → 10（V1.6.5）：work_logs 补建 log_date 唯一索引，
+    // 修复一处**迁移与实体长期不一致**的隐患：
+    // MIGRATION_3_4 建表时创建了 `index_work_logs_log_date`（实体注释也写明「每日期望一条」），
+    // 但 WorkLogEntity 一直没声明 @Index —— Room 在迁移结束后的 schema 校验里会判定
+    // 「多出一个索引」并抛 IllegalStateException，即 **从 v2/v3 直接升级上来的老用户会启动崩溃**。
+    // 从 v4 起升级的用户库内已有该索引，本条迁移是幂等的 no-op；
+    // 同时把实体补上索引与 content 默认值声明，使「新建」与「迁移」产出的表结构完全一致。
+    val MIGRATION_9_10 = object : Migration(9, 10) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_work_logs_log_date ON work_logs (log_date)")
+        }
+    }
+
     /** 全部迁移按版本号升序注册，新增迁移追加到末尾 */
     val ALL: Array<Migration> = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
-        MIGRATION_7_8, MIGRATION_8_9
+        MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10
     )
 }

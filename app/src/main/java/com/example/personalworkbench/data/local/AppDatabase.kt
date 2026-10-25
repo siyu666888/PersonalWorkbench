@@ -41,7 +41,7 @@ import com.example.personalworkbench.data.local.entities.WorkLogEntity
         ProjectEntity::class, MilestoneEntity::class, ResourceEntity::class,
         IssueEntity::class, DailyReportEntity::class, WorkLogEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

@@ -829,6 +829,32 @@ PersonalWorkbench.exe --on-top                 # 窗口置顶
 - `./gradlew :app:assembleRelease` BUILD SUCCESSFUL。正式版 `outputs/PersonalWorkbench-v1.6.3-release.apk`（**3,430,540 bytes**，v2 + v3 双签名，证书 `CN=PersonalWorkbench`，SHA-256 `4ca1c1920c392f273b9bbf3e2238eb9d769f173cfcc513bbeae48a4fb777af90`）。
 - 混淆映射已归档 `outputs/mapping-v1.6.3.txt`。
 
+## 三·三十六、V1.6.5 修复老版本升级崩溃（work_logs 索引与实体不一致）
+
+版本号 `versionName 1.6.5 / versionCode 36`。数据库 `version 9 → 10`（新增 1 个迁移）。
+
+> 这一版没有新功能。起因是：V1.6.4 推送后 **CI 红了**（本地全绿），顺着一查，发现是一个**真实存在、会影响老用户的数据层缺陷**，外加**我自己迁移测试的一个假绿漏洞**。
+
+### 1. 真实缺陷：从 v2 / v3 升级上来的用户可能「打开即崩溃」
+- `MIGRATION_3_4` 建 `work_logs` 表时创建了 `index_work_logs_log_date`（唯一索引，语义是「每天只写一条日志」），但 `WorkLogEntity` **从来没有声明 `@Index`**。
+- Room 在**迁移结束**时会做全表 schema 校验：库里有索引、实体没声明 → 判定结构不一致 → 抛 `IllegalStateException: Migration didn't properly handle: work_logs(...)`，**应用启动即崩溃**。
+- 影响面：从 v2/v3 老库升级到最新版的用户会踩中；已经在 v4 之后升级过、或全新安装的用户不受影响（Room 只在建库/升级时做这项校验，之后打开只比对 identity hash）。
+- 修复：
+  1. `WorkLogEntity` 补 `indices = [Index(value = ["log_date"], unique = true)]`，让「新建库」与「迁移库」结构一致；
+  2. 数据库升到 `version 10`，新增 `MIGRATION_9_10` 补建该索引（`IF NOT EXISTS`，对已有索引的用户是幂等空操作）；
+  3. 由 Room 自动导出 `app/schemas/.../10.json`，作为下一轮迁移的回归依据。
+- **一个差点又踩进去的坑**：最初想把 `content` 也声明成 `defaultValue = "''"` 让它和 `MIGRATION_3_4` 的建表语句完全一致，结果 v4→v10、…、v9→v10 六条路径全红——因为从 v4 起新建的库当年就没有这个默认值。实测确认 Room 的比较规则是「**只有实体声明了默认值时才比**」，所以实体侧必须保持不声明，才能同时兼容两类历史库。这条结论已写进实体注释，避免以后又被「对齐」掉。
+
+### 2. 测试自身的漏洞：迁移测试假绿
+- 原实现用 `SQLiteDatabase.openOrCreateDatabase(file)` 造旧库，再用 Room 打开同一个文件名。在 Robolectric（Windows 本地）上两者可能落在**不同的连接/文件句柄**：Room 看到的是空库 → 走 `onCreate` 建出全新 v9 → 版本号、表、列全都「正确」，**迁移一条都没跑**，测试却是绿的。这正是本地 95 项全绿、CI 却报 `upgrade_from_v2_to_v9 FAILED` 的原因。
+- 修复办法（比加断言更根本）：改用 `FrameworkSQLiteOpenHelperFactory` 造旧库——与 Room 使用**同一套 SQLite 实现与命名空间**；同时在旧库里建一张 `__migration_marker` 表写一行数据，升级后必须仍能查到。若走了「新建」路径，这行必然消失，测试立刻变红。
+- 覆盖面：`v2→v10`、`v3→v10`、…、`v9→v10` 共 **8 条路径**，外加 `work_logs` 索引存在性断言。
+
+### 验证
+- `./gradlew :app:testDebugUnitTest` BUILD SUCCESSFUL，**108 / 108 全绿**（迁移用例 7 → 8）。
+- `./gradlew :app:assembleRelease` BUILD SUCCESSFUL；`PersonalWorkbench-1.6.5-release.apk`（**3,446,928 bytes**，v2 + v3 双签名，SHA-256 `09d848ed4c3df6c3cdedda621808c770c3ae127f3fca0c52ae548170ad7e1c00`）。
+- 数据库 schema：`app/schemas/com.example.personalworkbench.data.local.AppDatabase/10.json` 的 `work_logs` 已含 `DEFAULT ''` 与 `index_work_logs_log_date`，与 `MIGRATION_3_4` 的建表语句逐字一致。
+
 ## 三·三十五、V1.6.4 数据导出 Markdown/CSV + Baseline Profile + 构建提速
 
 版本号 `versionName 1.6.4 / versionCode 35`。数据库结构不变（仍为 version 9）。本轮对应 ROADMAP 第三阶段（体验与性能）的 A4 / C1 / C2 三项。

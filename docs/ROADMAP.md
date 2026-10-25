@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | 语言 / UI | Kotlin + Jetpack Compose（Material 3） | 全 Compose，无 XML 布局 |
 | 架构 | MVVM + Repository，Offline-First，Room 为唯一数据源 | `di/AppContainer.kt` 手动 DI（PRD 允许 Hilt 可选） |
-| 数据层 | Room **version 9**，**10 个迁移**；DataStore Preferences | `data/local/Migrations.kt`、`AppDatabase.kt:44` |
+| 数据层 | Room **version 10**，**11 个迁移**；DataStore Preferences | `data/local/Migrations.kt`、`AppDatabase.kt:50` |
 | 异步 | Coroutines + Flow | Repository 内切 IO 线程 |
 | 导航 | Navigation Compose | 5 个顶层 Tab（首页/待办/笔记/日程/我的） |
 | 提醒 | WorkManager（一次性 + 每日周期）+ 本地通知 | 不依赖精确闹钟权限 |
@@ -100,7 +100,7 @@
 | A4 导出 Markdown / CSV | 🟩 **已完成（V1.6.4）** | `util/DataExporter`（零 Android 依赖，可纯 JVM 测）+ `BackupViewModel.exportData` + 备份页「数据导出」卡片；Markdown/CSV 两种格式，5 类模块；CSV 带 BOM 且 RFC4180 转义；`DataExporterTest` 11 例 |
 | B1 desktop 进 CI | 🟩 **已完成（V1.6.2）** | `ci.yml` 新增 `:desktop:compileKotlin`，本地实测 27s 通过 |
 | D1 Compose UI 测试 | 🟩 **已完成（V1.6.3）** | `KeyUserFlowTest` 3 例：待办勾选写库、日志保存落库、打卡记录渲染；顺带修复 `CircleCheckbox` 缺 ToggleableState 语义 |
-| D2 全链路迁移测试 | 🟩 **已完成（V1.6.3）** | `FullMigrationPathTest` 覆盖 2→9 … 8→9 共 7 条升级路径 |
+| D2 全链路迁移测试 | 🟩 **已完成（V1.6.3，V1.6.5 加固）** | `FullMigrationPathTest` 覆盖 2→10 … 9→10 共 8 条路径；V1.6.5 修补了「造旧库的句柄与 Room 不一致 → 假绿」的漏洞（改用 `FrameworkSQLiteOpenHelperFactory` + 旧库标记行），并借此发现并修复了 work_logs 索引与实体不一致导致的**老版本升级崩溃** |
 | D3 日期格式化收敛 | 🟩 **基本完成** | 默认值已含年份；剩余 4 处为刻意的同年省略写法 |
 | D4 发布与追溯流程 | 🟩 **已完成（V1.6.2）** | git tag `v1.6.2` + GitHub Release（附 APK + mapping.txt） |
 | D5 Changelog 推定日期核对 | ⬜ **待用户提供** | 1.5.3~1.5.6 仍为推定值；git 仅 13 提交、记忆无记录，需你提供真实发布日 |
@@ -110,6 +110,7 @@
 | V1.6.2 正式版交付 | 🟩 **完成** | 见 README V1.6.2 章节（SHA-256 同步记入） |
 | V1.6.3 正式版交付 | 🟩 **完成** | 3,430,540 bytes；测试 95 → 106（V1.6.4 又 +11） |
 | V1.6.4 正式版交付 | 🟩 **完成** | 见 README V1.6.4 章节（A4/C1/C2 三项齐活） |
+| V1.6.5 正式版交付 | 🟩 **完成** | DB v10；修复 v2/v3 升级崩溃（C5 风险实测命中并闭环），迁移测试 8 路径全覆盖 |
 
 > **A1 的定性修正**：初版判断为「默认即外发」，实地核查 `AiAssistantViewModel.send()` 后修正——
 > 联网判定是 `config.key.isNotBlank()`，未填 Key 时确实走本地问答，**默认并未外发**。

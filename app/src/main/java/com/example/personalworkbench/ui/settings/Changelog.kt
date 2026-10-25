@@ -20,6 +20,17 @@ data class ChangelogEntry(
 object Changelog {
     val entries: List<ChangelogEntry> = listOf(
         ChangelogEntry(
+            version = "1.6.5",
+            date = "2026-10-25",
+            title = "修复老版本升级崩溃：工作日志表索引与实体不一致",
+            highlights = listOf(
+                "修复从 V1.2 / V1.3 老版本直接升级时可能「打开即崩溃」的问题：工作日志表的唯一索引此前只在迁移里建、实体没声明，Room 升级校验会判定结构不符",
+                "数据库版本升至 10，新增 9→10 迁移补建该索引（对已在 V1.3.7 之后升级过的用户是幂等空操作）",
+                "迁移测试改为「在旧库写入标记数据再升级」，可真正验证原地升级；从 v2 到 v10 共 8 条路径全覆盖",
+                "测试总数 107 → 108"
+            )
+        ),
+        ChangelogEntry(
             version = "1.6.4",
             date = "2026-10-25",
             title = "数据导出 Markdown/CSV · Baseline Profile · 构建提速",
